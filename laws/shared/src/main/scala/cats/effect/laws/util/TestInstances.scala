@@ -112,7 +112,8 @@ trait TestInstances {
         E.eqv(unwrap(x), unwrap(y))
     }
 
-  /** Defines equality for `SyncIO` references. */
+  /**
+   * Defines equality for `SyncIO` references. */
   implicit def eqSyncIO[A](implicit A: Eq[A]): Eq[SyncIO[A]] =
     new Eq[SyncIO[A]] {
       def eqv(x: SyncIO[A], y: SyncIO[A]): Boolean = {

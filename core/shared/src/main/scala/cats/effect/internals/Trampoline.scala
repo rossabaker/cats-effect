@@ -33,17 +33,14 @@ private[internals] class Trampoline(underlying: ExecutionContext) {
   def startLoop(runnable: Runnable): Unit = {
     withinLoop = true
     try immediateLoop(runnable)
-    finally {
-      withinLoop = false
-    }
+    finally withinLoop = false
   }
 
   final def execute(runnable: Runnable): Unit =
-    if (!withinLoop) {
+    if (!withinLoop)
       startLoop(runnable)
-    } else {
+    else
       immediateQueue.push(runnable)
-    }
 
   final protected def forkTheRest(): Unit = {
     final class ResumeRun(head: Runnable, rest: ArrayStack[Runnable]) extends Runnable {
@@ -63,9 +60,8 @@ private[internals] class Trampoline(underlying: ExecutionContext) {
 
   @tailrec
   final private def immediateLoop(task: Runnable): Unit = {
-    try {
-      task.run()
-    } catch {
+    try task.run()
+    catch {
       case ex: Throwable =>
         forkTheRest()
         if (NonFatal(ex)) underlying.reportFailure(ex)

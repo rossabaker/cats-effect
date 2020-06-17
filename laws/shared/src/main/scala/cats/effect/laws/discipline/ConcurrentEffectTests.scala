@@ -26,8 +26,7 @@ import org.scalacheck._, Prop.forAll
 trait ConcurrentEffectTests[F[_]] extends ConcurrentTests[F] with EffectTests[F] {
   def laws: ConcurrentEffectLaws[F]
 
-  def concurrentEffect[A: Arbitrary: Eq, B: Arbitrary: Eq, C: Arbitrary: Eq](
-    implicit
+  def concurrentEffect[A: Arbitrary: Eq, B: Arbitrary: Eq, C: Arbitrary: Eq](implicit
     ArbFA: Arbitrary[F[A]],
     ArbFB: Arbitrary[F[B]],
     ArbFC: Arbitrary[F[C]],

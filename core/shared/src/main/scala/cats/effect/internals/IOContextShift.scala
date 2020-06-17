@@ -36,11 +36,13 @@ final private[internals] class IOContextShift private (ec: ExecutionContext) ext
 
 private[effect] object IOContextShift {
 
-  /** `ContextShift` builder. */
+  /**
+   * `ContextShift` builder. */
   def apply(ec: ExecutionContext): ContextShift[IO] =
     new IOContextShift(ec)
 
-  /** Global instance, used in `IOApp` on JavaScript (see: PoolUtils for the JVM semantics). */
+  /**
+   * Global instance, used in `IOApp` on JavaScript (see: PoolUtils for the JVM semantics). */
   lazy val global: ContextShift[IO] =
     apply(ExecutionContext.Implicits.global)
 }

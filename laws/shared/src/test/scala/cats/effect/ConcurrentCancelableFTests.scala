@@ -55,9 +55,7 @@ class ConcurrentCancelableFTests extends BaseTestsSuite {
       val task = timer.sleep(1.second) *> IO(cb(Right(10)))
       for {
         fiber <- task.start
-      } yield {
-        fiber.cancel
-      }
+      } yield fiber.cancel
     }
 
     val f = task.unsafeToFuture()
@@ -102,9 +100,7 @@ class ConcurrentCancelableFTests extends BaseTestsSuite {
       r <- d.tryTake
       _ <- fiber.cancel
       _ <- d.take
-    } yield {
-      r shouldBe None
-    }
+    } yield r shouldBe None
 
     val f = task.unsafeToFuture()
     ec.tick()

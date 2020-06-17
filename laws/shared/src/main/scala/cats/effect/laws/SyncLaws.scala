@@ -144,7 +144,8 @@ trait SyncLaws[F[_]] extends BracketLaws[F, Throwable] with DeferLaws[F] {
 }
 
 object SyncLaws {
-  def apply[F[_]](implicit F0: Sync[F]): SyncLaws[F] = new SyncLaws[F] {
-    val F = F0
-  }
+  def apply[F[_]](implicit F0: Sync[F]): SyncLaws[F] =
+    new SyncLaws[F] {
+      val F = F0
+    }
 }

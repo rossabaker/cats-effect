@@ -23,14 +23,13 @@ private[effect] object IOAppPlatform {
     run: List[String] => IO[ExitCode]
   ): Unit = {
     val code = mainFiber(args, contextShift, timer)(run).flatMap(_.join).unsafeRunSync()
-    if (code == 0) {
+    if (code == 0)
       // Return naturally from main. This allows any non-daemon
       // threads to gracefully complete their work, and managed
       // environments to execute their own shutdown hooks.
       ()
-    } else {
+    else
       sys.exit(code)
-    }
   }
 
   def mainFiber(args: Array[String], contextShift: Eval[ContextShift[IO]], timer: Eval[Timer[IO]])(
@@ -38,9 +37,11 @@ private[effect] object IOAppPlatform {
   ): IO[Fiber[IO, Int]] = {
     val _ = timer // is used on Scala.js
     val io = run(args.toList).redeem(e => {
-      Logger.reportFailure(e)
-      ExitCode.Error.code
-    }, r => r.code)
+                                       Logger.reportFailure(e)
+                                       ExitCode.Error.code
+                                     },
+                                     r => r.code
+    )
 
     io.start(contextShift.value).flatMap { fiber =>
       installHook(fiber).map(_ => fiber)

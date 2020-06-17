@@ -76,7 +76,8 @@ sealed abstract private[effect] class IOConnection {
 
 private[effect] object IOConnection {
 
-  /** Builder for [[IOConnection]]. */
+  /**
+   * Builder for [[IOConnection]]. */
   def apply(): IOConnection =
     new Impl
 

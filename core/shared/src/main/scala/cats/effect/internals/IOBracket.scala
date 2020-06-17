@@ -37,13 +37,12 @@ private[effect] object IOBracket {
       // Race-condition check, avoiding starting the bracket if the connection
       // was cancelled already, to ensure that `cancel` really blocks if we
       // start `acquire` — n.b. `isCanceled` is visible here due to `push`
-      if (!conn.isCanceled) {
+      if (!conn.isCanceled)
         // Note `acquire` is uncancelable due to usage of `IORunLoop.start`
         // (in other words it is disconnected from our IOConnection)
         IORunLoop.start[A](acquire, new BracketStart(use, release, conn, deferredRelease, cb))
-      } else {
+      else
         deferredRelease.complete(IO.unit)
-      }
     }
 
   // Internals of `IO.bracketCase`.
@@ -61,39 +60,39 @@ private[effect] object IOBracket {
     private[this] var result: Either[Throwable, A] = _
 
     def apply(ea: Either[Throwable, A]): Unit = {
-      if (result ne null) {
+      if (result ne null)
         throw new IllegalStateException("callback called multiple times!")
-      }
       // Introducing a light async boundary, otherwise executing the required
       // logic directly will yield a StackOverflowException
       result = ea
       ec.execute(this)
     }
 
-    def run(): Unit = result match {
-      case Right(a) =>
-        val frame = new BracketReleaseFrame[A, B](a, release)
+    def run(): Unit =
+      result match {
+        case Right(a) =>
+          val frame = new BracketReleaseFrame[A, B](a, release)
 
-        // Registering our cancelable token ensures that in case
-        // cancellation is detected, `release` gets called
-        deferredRelease.complete(frame.cancel)
+          // Registering our cancelable token ensures that in case
+          // cancellation is detected, `release` gets called
+          deferredRelease.complete(frame.cancel)
 
-        // Check if IO wasn't already cancelled in acquire
-        if (!conn.isCanceled) {
-          val onNext = {
-            val fb =
-              try use(a)
-              catch { case NonFatal(e) => IO.raiseError(e) }
-            fb.flatMap(frame)
+          // Check if IO wasn't already cancelled in acquire
+          if (!conn.isCanceled) {
+            val onNext = {
+              val fb =
+                try use(a)
+                catch { case NonFatal(e) => IO.raiseError(e) }
+              fb.flatMap(frame)
+            }
+            // Actual execution
+            IORunLoop.startCancelable(onNext, conn, cb)
           }
-          // Actual execution
-          IORunLoop.startCancelable(onNext, conn, cb)
-        }
 
-      case error @ Left(_) =>
-        deferredRelease.complete(IO.unit)
-        cb(error.asInstanceOf[Either[Throwable, B]])
-    }
+        case error @ Left(_) =>
+          deferredRelease.complete(IO.unit)
+          cb(error.asInstanceOf[Either[Throwable, B]])
+      }
   }
 
   /**
@@ -112,9 +111,8 @@ private[effect] object IOBracket {
           // Race condition check, avoiding starting `source` in case
           // the connection was already cancelled — n.b. we don't need
           // to trigger `release` otherwise, because it already happened
-          if (!conn.isCanceled) {
+          if (!conn.isCanceled)
             IORunLoop.startCancelable(onNext, conn, cb)
-          }
         }
       })
     }

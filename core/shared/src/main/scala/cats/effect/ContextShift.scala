@@ -46,7 +46,6 @@ trait ContextShift[F[_]] {
    *
    * This is the [[Async.shift]] operation, without the need for an
    * `ExecutionContext` taken as a parameter.
-   *
    */
   def shift: F[Unit]
 
@@ -117,9 +116,11 @@ object ContextShift {
    * Derives a [[ContextShift]] instance for `cats.data.WriterT`,
    * given we have one for `F[_]`.
    */
-  implicit def deriveWriterT[F[_], L](implicit F: Applicative[F],
-                                      L: Monoid[L],
-                                      cs: ContextShift[F]): ContextShift[WriterT[F, L, *]] =
+  implicit def deriveWriterT[F[_], L](implicit
+    F: Applicative[F],
+    L: Monoid[L],
+    cs: ContextShift[F]
+  ): ContextShift[WriterT[F, L, *]] =
     new ContextShift[WriterT[F, L, *]] {
       def shift: WriterT[F, L, Unit] =
         WriterT.liftF(cs.shift)

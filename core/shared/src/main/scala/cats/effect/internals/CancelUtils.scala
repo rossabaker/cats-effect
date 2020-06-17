@@ -29,32 +29,30 @@ private[effect] object CancelUtils {
    * exceptions until all references are canceled.
    */
   def cancelAll(cancelables: CancelToken[IO]*): CancelToken[IO] =
-    if (cancelables.isEmpty) {
+    if (cancelables.isEmpty)
       IO.unit
-    } else {
+    else
       IO.suspend {
         cancelAll(cancelables.iterator)
       }
-    }
 
   def cancelAll(cursor: Iterator[CancelToken[IO]]): CancelToken[IO] =
-    if (cursor.isEmpty) {
+    if (cursor.isEmpty)
       IO.unit
-    } else {
+    else
       IO.suspend {
         val frame = new CancelAllFrame(cursor)
         frame.loop()
       }
-    }
 
   // Optimization for `cancelAll`
   final private class CancelAllFrame(cursor: Iterator[CancelToken[IO]]) extends IOFrame[Unit, IO[Unit]] {
     private[this] val errors = ListBuffer.empty[Throwable]
 
     def loop(): CancelToken[IO] =
-      if (cursor.hasNext) {
+      if (cursor.hasNext)
         cursor.next().flatMap(this)
-      } else {
+      else
         errors.toList match {
           case Nil =>
             IO.unit
@@ -64,7 +62,6 @@ private[effect] object CancelUtils {
             rest.foreach(Logger.reportFailure)
             IO.raiseError(first)
         }
-      }
 
     def apply(a: Unit): IO[Unit] =
       loop()

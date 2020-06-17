@@ -20,7 +20,8 @@ package internals
 
 import javax.security.auth.Destroyable
 
-/** JVM-specific Resource methods */
+/**
+ * JVM-specific Resource methods */
 private[effect] trait ResourcePlatform {
 
   /**

@@ -29,29 +29,30 @@ trait SyncEffectTests[F[_]] extends SyncTests[F] {
   def laws: SyncEffectLaws[F]
 
   def syncEffect[A: Arbitrary: Eq, B: Arbitrary: Eq, C: Arbitrary: Eq](implicit
-                                                                       ArbFA: Arbitrary[F[A]],
-                                                                       ArbFB: Arbitrary[F[B]],
-                                                                       ArbFC: Arbitrary[F[C]],
-                                                                       ArbFU: Arbitrary[F[Unit]],
-                                                                       ArbFAtoB: Arbitrary[F[A => B]],
-                                                                       ArbFBtoC: Arbitrary[F[B => C]],
-                                                                       ArbT: Arbitrary[Throwable],
-                                                                       CogenA: Cogen[A],
-                                                                       CogenB: Cogen[B],
-                                                                       CogenC: Cogen[C],
-                                                                       CogenT: Cogen[Throwable],
-                                                                       EqFA: Eq[F[A]],
-                                                                       EqFB: Eq[F[B]],
-                                                                       EqFC: Eq[F[C]],
-                                                                       EqFU: Eq[F[Unit]],
-                                                                       EqT: Eq[Throwable],
-                                                                       EqFEitherTU: Eq[F[Either[Throwable, Unit]]],
-                                                                       EqFEitherTA: Eq[F[Either[Throwable, A]]],
-                                                                       EqEitherTFTA: Eq[EitherT[F, Throwable, A]],
-                                                                       EqFABC: Eq[F[(A, B, C)]],
-                                                                       EqFInt: Eq[F[Int]],
-                                                                       iso: Isomorphisms[F],
-                                                                       params: Parameters): RuleSet =
+    ArbFA: Arbitrary[F[A]],
+    ArbFB: Arbitrary[F[B]],
+    ArbFC: Arbitrary[F[C]],
+    ArbFU: Arbitrary[F[Unit]],
+    ArbFAtoB: Arbitrary[F[A => B]],
+    ArbFBtoC: Arbitrary[F[B => C]],
+    ArbT: Arbitrary[Throwable],
+    CogenA: Cogen[A],
+    CogenB: Cogen[B],
+    CogenC: Cogen[C],
+    CogenT: Cogen[Throwable],
+    EqFA: Eq[F[A]],
+    EqFB: Eq[F[B]],
+    EqFC: Eq[F[C]],
+    EqFU: Eq[F[Unit]],
+    EqT: Eq[Throwable],
+    EqFEitherTU: Eq[F[Either[Throwable, Unit]]],
+    EqFEitherTA: Eq[F[Either[Throwable, A]]],
+    EqEitherTFTA: Eq[EitherT[F, Throwable, A]],
+    EqFABC: Eq[F[(A, B, C)]],
+    EqFInt: Eq[F[Int]],
+    iso: Isomorphisms[F],
+    params: Parameters
+  ): RuleSet =
     new RuleSet {
       val name = "syncEffect"
       val bases = Nil
@@ -63,7 +64,8 @@ trait SyncEffectTests[F[_]] extends SyncTests[F] {
 }
 
 object SyncEffectTests {
-  def apply[F[_]: SyncEffect]: SyncEffectTests[F] = new SyncEffectTests[F] {
-    def laws = SyncEffectLaws[F]
-  }
+  def apply[F[_]: SyncEffect]: SyncEffectTests[F] =
+    new SyncEffectTests[F] {
+      def laws = SyncEffectLaws[F]
+    }
 }

@@ -21,11 +21,13 @@ import cats.effect.IO.ContextSwitch
 
 private[effect] object IOCancel {
 
-  /** Implementation for `IO.uncancelable`. */
+  /**
+   * Implementation for `IO.uncancelable`. */
   def uncancelable[A](fa: IO[A]): IO[A] =
     ContextSwitch(fa, makeUncancelable, disableUncancelable)
 
-  /** Internal reusable reference. */
+  /**
+   * Internal reusable reference. */
   private[this] val makeUncancelable: IOConnection => IOConnection =
     _ => IOConnection.uncancelable
   private[this] val disableUncancelable: (Any, Throwable, IOConnection, IOConnection) => IOConnection =

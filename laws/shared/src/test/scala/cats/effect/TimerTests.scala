@@ -73,21 +73,15 @@ class TimerTests extends AsyncFunSuite with Matchers {
       start <- timer.clock.monotonic(MILLISECONDS)
       _ <- timer.sleep(100.millis)
       end <- timer.clock.monotonic(MILLISECONDS)
-    } yield {
-      end - start
-    }
+    } yield end - start
 
-    for (r <- io.unsafeToFuture()) yield {
-      r should be >= 90L
-    }
+    for (r <- io.unsafeToFuture()) yield r should be >= 90L
   }
 
   test("Timer[IO].sleep(negative)") {
     val io = timer.sleep(-10.seconds).map(_ => 10)
 
-    for (r <- io.unsafeToFuture()) yield {
-      r shouldBe 10
-    }
+    for (r <- io.unsafeToFuture()) yield r shouldBe 10
   }
 
   test("Timer[EitherT].clock.realTime") {
@@ -116,21 +110,15 @@ class TimerTests extends AsyncFunSuite with Matchers {
       start <- t.clock.monotonic(MILLISECONDS)
       _ <- t.sleep(100.millis)
       end <- t.clock.monotonic(MILLISECONDS)
-    } yield {
-      end - start
-    }
+    } yield end - start
 
-    for (r <- io.value.unsafeToFuture()) yield {
-      r.getOrElse(0L) should be > 0L
-    }
+    for (r <- io.value.unsafeToFuture()) yield r.getOrElse(0L) should be > 0L
   }
 
   test("Timer[EitherT].sleep(negative)") {
     val io = Timer[EitherTIO].sleep(-10.seconds).map(_ => 10)
 
-    for (r <- io.value.unsafeToFuture()) yield {
-      r.getOrElse(0) shouldBe 10
-    }
+    for (r <- io.value.unsafeToFuture()) yield r.getOrElse(0) shouldBe 10
   }
 
   // --- OptionT
@@ -161,21 +149,15 @@ class TimerTests extends AsyncFunSuite with Matchers {
       start <- t.clock.monotonic(MILLISECONDS)
       _ <- t.sleep(100.millis)
       end <- t.clock.monotonic(MILLISECONDS)
-    } yield {
-      end - start
-    }
+    } yield end - start
 
-    for (r <- io.value.unsafeToFuture()) yield {
-      r.getOrElse(0L) should be > 0L
-    }
+    for (r <- io.value.unsafeToFuture()) yield r.getOrElse(0L) should be > 0L
   }
 
   test("Timer[OptionT].sleep(negative)") {
     val io = Timer[OptionTIO].sleep(-10.seconds).map(_ => 10)
 
-    for (r <- io.value.unsafeToFuture()) yield {
-      r.getOrElse(0) shouldBe 10
-    }
+    for (r <- io.value.unsafeToFuture()) yield r.getOrElse(0) shouldBe 10
   }
 
   // --- WriterT
@@ -206,21 +188,15 @@ class TimerTests extends AsyncFunSuite with Matchers {
       start <- t.clock.monotonic(MILLISECONDS)
       _ <- t.sleep(100.millis)
       end <- t.clock.monotonic(MILLISECONDS)
-    } yield {
-      end - start
-    }
+    } yield end - start
 
-    for (r <- io.value.unsafeToFuture()) yield {
-      r should be > 0L
-    }
+    for (r <- io.value.unsafeToFuture()) yield r should be > 0L
   }
 
   test("Timer[WriterT].sleep(negative)") {
     val io = Timer[WriterTIO].sleep(-10.seconds).map(_ => 10)
 
-    for (r <- io.value.unsafeToFuture()) yield {
-      r shouldBe 10
-    }
+    for (r <- io.value.unsafeToFuture()) yield r shouldBe 10
   }
 
   // --- Kleisli
@@ -251,21 +227,15 @@ class TimerTests extends AsyncFunSuite with Matchers {
       start <- t.clock.monotonic(MILLISECONDS)
       _ <- t.sleep(100.millis)
       end <- t.clock.monotonic(MILLISECONDS)
-    } yield {
-      end - start
-    }
+    } yield end - start
 
-    for (r <- io.run(0).unsafeToFuture()) yield {
-      r should be > 0L
-    }
+    for (r <- io.run(0).unsafeToFuture()) yield r should be > 0L
   }
 
   test("Timer[Kleisli].sleep(negative)") {
     val io = Timer[KleisliIO].sleep(-10.seconds).map(_ => 10)
 
-    for (r <- io.run(0).unsafeToFuture()) yield {
-      r shouldBe 10
-    }
+    for (r <- io.run(0).unsafeToFuture()) yield r shouldBe 10
   }
 
   // --- StateT
@@ -296,21 +266,15 @@ class TimerTests extends AsyncFunSuite with Matchers {
       start <- t.clock.monotonic(MILLISECONDS)
       _ <- t.sleep(100.millis)
       end <- t.clock.monotonic(MILLISECONDS)
-    } yield {
-      end - start
-    }
+    } yield end - start
 
-    for (r <- io.run(0).unsafeToFuture()) yield {
-      r._2 should be > 0L
-    }
+    for (r <- io.run(0).unsafeToFuture()) yield r._2 should be > 0L
   }
 
   test("Timer[StateT].sleep(negative)") {
     val io = Timer[StateTIO].sleep(-10.seconds).map(_ => 10)
 
-    for (r <- io.run(0).unsafeToFuture()) yield {
-      r._2 shouldBe 10
-    }
+    for (r <- io.run(0).unsafeToFuture()) yield r._2 shouldBe 10
   }
 
   // --- IorT
@@ -341,21 +305,15 @@ class TimerTests extends AsyncFunSuite with Matchers {
       start <- t.clock.monotonic(MILLISECONDS)
       _ <- t.sleep(100.millis)
       end <- t.clock.monotonic(MILLISECONDS)
-    } yield {
-      end - start
-    }
+    } yield end - start
 
-    for (r <- io.value.unsafeToFuture()) yield {
-      r.getOrElse(0L) should be > 0L
-    }
+    for (r <- io.value.unsafeToFuture()) yield r.getOrElse(0L) should be > 0L
   }
 
   test("Timer[IorT].sleep(negative)") {
     val io = Timer[IorTIO].sleep(-10.seconds).map(_ => 10)
 
-    for (r <- io.value.unsafeToFuture()) yield {
-      r.getOrElse(0L) shouldBe 10
-    }
+    for (r <- io.value.unsafeToFuture()) yield r.getOrElse(0L) shouldBe 10
   }
 
   // --- Resource
@@ -386,20 +344,14 @@ class TimerTests extends AsyncFunSuite with Matchers {
       start <- t.clock.monotonic(MILLISECONDS)
       _ <- t.sleep(100.millis)
       end <- t.clock.monotonic(MILLISECONDS)
-    } yield {
-      end - start
-    }
+    } yield end - start
 
-    for (r <- io.use(IO.pure).unsafeToFuture()) yield {
-      r should be > 0L
-    }
+    for (r <- io.use(IO.pure).unsafeToFuture()) yield r should be > 0L
   }
 
   test("Timer[Resource].sleep(negative)") {
     val io = Timer[ResourceIO].sleep(-10.seconds).map(_ => 10)
 
-    for (r <- io.use(IO.pure).unsafeToFuture()) yield {
-      r shouldBe 10
-    }
+    for (r <- io.use(IO.pure).unsafeToFuture()) yield r shouldBe 10
   }
 }

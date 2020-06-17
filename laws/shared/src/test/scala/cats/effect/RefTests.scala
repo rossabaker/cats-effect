@@ -23,9 +23,10 @@ import cats.laws.discipline._
 import org.scalacheck.Arbitrary
 
 class RefTests extends BaseTestsSuite {
-  implicit def arbitraryRef[A: Arbitrary]: Arbitrary[Ref[IO, A]] = Arbitrary {
-    Arbitrary.arbitrary[A].map(Ref.unsafe[IO, A](_))
-  }
+  implicit def arbitraryRef[A: Arbitrary]: Arbitrary[Ref[IO, A]] =
+    Arbitrary {
+      Arbitrary.arbitrary[A].map(Ref.unsafe[IO, A](_))
+    }
 
   implicit def eqRef[A: Eq]: Eq[Ref[IO, A]] = Eq.by(_.get.unsafeRunSync())
 

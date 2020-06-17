@@ -29,25 +29,22 @@ private[effect] object CancelableF {
     F.asyncF { cb =>
       val state = new AtomicReference[Either[Throwable, Unit] => Unit](null)
       val cb1 = (a: Either[Throwable, A]) => {
-        try {
-          cb(a)
-        } finally {
-          // This CAS can only succeed in case the operation is already finished
-          // and no cancellation token was installed yet
-          if (!state.compareAndSet(null, Callback.dummy1)) {
-            val cb2 = state.get()
-            state.lazySet(null)
-            cb2(Callback.rightUnit)
-          }
+        try cb(a)
+        finally
+        // This CAS can only succeed in case the operation is already finished
+        // and no cancellation token was installed yet
+        if (!state.compareAndSet(null, Callback.dummy1)) {
+          val cb2 = state.get()
+          state.lazySet(null)
+          cb2(Callback.rightUnit)
         }
       }
       // Until we've got a cancellation token, the task needs to be evaluated
       // uninterruptedly, otherwise risking a leak, hence the bracket
       F.bracketCase(k(cb1)) { _ =>
         F.async[Unit] { cb =>
-          if (!state.compareAndSet(null, cb)) {
+          if (!state.compareAndSet(null, cb))
             cb(Callback.rightUnit)
-          }
         }
       } { (token, e) =>
         e match {

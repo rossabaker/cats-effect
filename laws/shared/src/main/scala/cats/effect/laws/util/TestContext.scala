@@ -243,21 +243,22 @@ final class TestContext private () extends ExecutionContext { self =>
    * @return `true` if a task was available in the internal queue, and
    *        was executed, or `false` otherwise
    */
-  def tickOne(): Boolean = synchronized {
-    val current = stateRef
+  def tickOne(): Boolean =
+    synchronized {
+      val current = stateRef
 
-    // extracting one task by taking the immediate tasks
-    extractOneTask(current, current.clock) match {
-      case Some((head, rest)) =>
-        stateRef = current.copy(tasks = rest)
-        // execute task
-        try head.task.run()
-        catch { case NonFatal(ex) => reportFailure(ex) }
-        true
-      case None =>
-        false
+      // extracting one task by taking the immediate tasks
+      extractOneTask(current, current.clock) match {
+        case Some((head, rest)) =>
+          stateRef = current.copy(tasks = rest)
+          // execute task
+          try head.task.run()
+          catch { case NonFatal(ex) => reportFailure(ex) }
+          true
+        case None =>
+          false
+      }
     }
-  }
 
   /**
    * Triggers execution by going through the queue of scheduled tasks and
@@ -288,7 +289,6 @@ final class TestContext private () extends ExecutionContext { self =>
    * $timerExample
    *
    * @param time is an optional parameter for simulating time passing;
-   *
    */
   def tick(time: FiniteDuration = Duration.Zero): Unit = {
     val targetTime = this.stateRef.clock + time
@@ -330,9 +330,10 @@ final class TestContext private () extends ExecutionContext { self =>
         None
     }
 
-  private def cancelTask(t: Task): Unit = synchronized {
-    stateRef = stateRef.copy(tasks = stateRef.tasks - t)
-  }
+  private def cancelTask(t: Task): Unit =
+    synchronized {
+      stateRef = stateRef.copy(tasks = stateRef.tasks - t)
+    }
 
   private def schedule(delay: FiniteDuration, r: Runnable): CancelToken[IO] =
     synchronized {
@@ -345,17 +346,20 @@ final class TestContext private () extends ExecutionContext { self =>
 
 object TestContext {
 
-  /** Builder for [[TestContext]] instances. */
+  /**
+   * Builder for [[TestContext]] instances. */
   def apply(): TestContext =
     new TestContext
 
-  /** Used internally by [[TestContext]], represents the internal
+  /**
+   * Used internally by [[TestContext]], represents the internal
    * state used for task scheduling and execution.
    */
   final case class State(lastID: Long,
                          clock: FiniteDuration,
                          tasks: SortedSet[Task],
-                         lastReportedFailure: Option[Throwable]) {
+                         lastReportedFailure: Option[Throwable]
+  ) {
     // $COVERAGE-OFF$
     assert(!tasks.headOption.exists(_.runsAt < clock), "The runsAt for any task must never be in the past")
     // $COVERAGE-ON$
@@ -374,7 +378,8 @@ object TestContext {
      */
     private[TestContext] def scheduleOnce(delay: FiniteDuration,
                                           r: Runnable,
-                                          cancelTask: Task => Unit): (CancelToken[IO], State) = {
+                                          cancelTask: Task => Unit
+    ): (CancelToken[IO], State) = {
       val d = if (delay >= Duration.Zero) delay else Duration.Zero
       val newID = lastID + 1
 
@@ -385,7 +390,8 @@ object TestContext {
        copy(
          lastID = newID,
          tasks = tasks + task
-       ))
+       )
+      )
     }
   }
 

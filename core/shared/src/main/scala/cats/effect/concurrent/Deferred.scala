@@ -93,11 +93,13 @@ abstract class TryableDeferred[F[_], A] extends Deferred[F, A] {
 
 object Deferred {
 
-  /** Creates an unset promise. **/
+  /**
+   * Creates an unset promise. * */
   def apply[F[_], A](implicit F: Concurrent[F]): F[Deferred[F, A]] =
     F.delay(unsafe[F, A])
 
-  /** Creates an unset tryable promise. **/
+  /**
+   * Creates an unset tryable promise. * */
   def tryable[F[_], A](implicit F: Concurrent[F]): F[TryableDeferred[F, A]] =
     F.delay(unsafeTryable[F, A])
 
@@ -122,11 +124,13 @@ object Deferred {
   def uncancelable[F[_], A](implicit F: Async[F]): F[Deferred[F, A]] =
     F.delay(unsafeUncancelable[F, A])
 
-  /** Like [[apply]] but initializes state using another effect constructor */
+  /**
+   * Like [[apply]] but initializes state using another effect constructor */
   def in[F[_], G[_], A](implicit F: Sync[F], G: Concurrent[G]): F[Deferred[G, A]] =
     F.delay(unsafe[G, A])
 
-  /** Like [[uncancelable]] but initializes state using another effect constructor */
+  /**
+   * Like [[uncancelable]] but initializes state using another effect constructor */
   def uncancelableIn[F[_], G[_], A](implicit F: Sync[F], G: Async[G]): F[Deferred[G, A]] =
     F.delay(unsafeUncancelable[G, A])
 
@@ -226,9 +230,8 @@ object Deferred {
               notifyReadersLoop(a, list)
             else
               F.unit
-          } else {
+          } else
             unsafeComplete(a)
-          }
       }
 
     private def notifyReadersLoop(a: A, r: Iterable[A => Unit]): F[Unit] = {

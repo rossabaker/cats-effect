@@ -91,10 +91,11 @@ object Fiber extends FiberInstances {
     /**
      * Modify the context `F` using transformation `f`.
      */
-    def mapK[G[_]](f: F ~> G): Fiber[G, A] = new Fiber[G, A] {
-      def cancel: CancelToken[G] = f(self.cancel)
-      def join: G[A] = f(self.join)
-    }
+    def mapK[G[_]](f: F ~> G): Fiber[G, A] =
+      new Fiber[G, A] {
+        def cancel: CancelToken[G] = f(self.cancel)
+        def join: G[A] = f(self.join)
+      }
   }
 }
 

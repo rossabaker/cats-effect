@@ -52,9 +52,8 @@ private[internals] object IOTimer {
    */
   val global: Timer[IO] = new IOTimer(new ExecutionContext {
     def execute(r: Runnable): Unit =
-      try {
-        r.run()
-      } catch { case e: Throwable => e.printStackTrace() }
+      try r.run()
+      catch { case e: Throwable => e.printStackTrace() }
 
     def reportFailure(e: Throwable): Unit =
       e.printStackTrace()

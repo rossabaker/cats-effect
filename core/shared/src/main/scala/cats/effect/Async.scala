@@ -347,8 +347,9 @@ object Async {
   /**
    * Like `Parallel.parTraverse`, but limits the degree of parallelism.
    */
-  def parTraverseN[T[_]: Traverse, M[_], A, B](n: Long)(ta: T[A])(f: A => M[B])(implicit M: Async[M],
-                                                                                P: Parallel[M]): M[T[B]] =
+  def parTraverseN[T[_]: Traverse, M[_], A, B](
+    n: Long
+  )(ta: T[A])(f: A => M[B])(implicit M: Async[M], P: Parallel[M]): M[T[B]] =
     for {
       semaphore <- Semaphore.uncancelable(n)(M)
       tb <- ta.parTraverse { a =>

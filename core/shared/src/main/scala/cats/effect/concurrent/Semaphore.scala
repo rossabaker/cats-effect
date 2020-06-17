@@ -67,7 +67,8 @@ abstract class Semaphore[F[_]] {
    */
   def acquireN(n: Long): F[Unit]
 
-  /** Acquires a single permit. Alias for `[[acquireN]](1)`. */
+  /**
+   * Acquires a single permit. Alias for `[[acquireN]](1)`. */
   def acquire: F[Unit] = acquireN(1)
 
   /**
@@ -77,7 +78,8 @@ abstract class Semaphore[F[_]] {
    */
   def tryAcquireN(n: Long): F[Boolean]
 
-  /** Alias for `[[tryAcquireN]](1)`. */
+  /**
+   * Alias for `[[tryAcquireN]](1)`. */
   def tryAcquire: F[Boolean] = tryAcquireN(1)
 
   /**
@@ -87,7 +89,8 @@ abstract class Semaphore[F[_]] {
    */
   def releaseN(n: Long): F[Unit]
 
-  /** Releases a single permit. Alias for `[[releaseN]](1)`. */
+  /**
+   * Releases a single permit. Alias for `[[releaseN]](1)`. */
   def release: F[Unit] = releaseN(1)
 
   /**
@@ -157,31 +160,32 @@ object Semaphore {
 
     def count: F[Long] = state.get.map(count_)
 
-    private def count_(s: State[F]): Long = s match {
-      case Left(waiting)    => -waiting.map(_._1).sum
-      case Right(available) => available
-    }
+    private def count_(s: State[F]): Long =
+      s match {
+        case Left(waiting)    => -waiting.map(_._1).sum
+        case Right(available) => available
+      }
 
-    def acquireN(n: Long): F[Unit] = F.bracketCase(acquireNInternal(n)) { case (g, _) => g } {
-      case ((_, c), ExitCase.Canceled) => c
-      case _                           => F.unit
-    }
+    def acquireN(n: Long): F[Unit] =
+      F.bracketCase(acquireNInternal(n)) { case (g, _) => g } {
+        case ((_, c), ExitCase.Canceled) => c
+        case _                           => F.unit
+      }
 
     def acquireNInternal(n: Long): F[(F[Unit], F[Unit])] =
       assertNonNegative[F](n) *> {
         if (n == 0) F.pure((F.unit, F.unit))
-        else {
+        else
           mkGate.flatMap { gate =>
             state
               .modify { old =>
                 val u = old match {
                   case Left(waiting) => Left(waiting :+ (n -> gate))
                   case Right(m) =>
-                    if (n <= m) {
+                    if (n <= m)
                       Right(m - n)
-                    } else {
+                    else
                       Left(Queue((n - m) -> gate))
-                    }
                 }
                 (u, u)
               }
@@ -204,7 +208,6 @@ object Semaphore {
                 case Right(_) => F.unit -> releaseN(n)
               }
           }
-        }
       }
 
     def tryAcquireN(n: Long): F[Boolean] =
@@ -268,10 +271,11 @@ object Semaphore {
             }
       }
 
-    def available: F[Long] = state.get.map {
-      case Left(_)  => 0
-      case Right(n) => n
-    }
+    def available: F[Long] =
+      state.get.map {
+        case Left(_)  => 0
+        case Right(n) => n
+      }
 
     def withPermit[A](t: F[A]): F[A] =
       F.bracket(acquireNInternal(1)) { case (g, _) => g *> t } { case (_, c) => c }

@@ -18,7 +18,8 @@ package cats.effect.util
 
 import cats.data.NonEmptyList
 
-/** A composite exception represents a list of exceptions
+/**
+ * A composite exception represents a list of exceptions
  * caught from evaluating multiple independent actions
  * and that need to be signaled together.
  *
@@ -34,18 +35,21 @@ final class CompositeException(val head: Throwable, val tail: NonEmptyList[Throw
     )
     with Serializable {
 
-  /** Returns the set of all errors wrapped by this composite. */
+  /**
+   * Returns the set of all errors wrapped by this composite. */
   def all: NonEmptyList[Throwable] =
     head :: tail
 }
 
 object CompositeException {
 
-  /** Simple builder for [[CompositeException]]. */
+  /**
+   * Simple builder for [[CompositeException]]. */
   def apply(first: Throwable, second: Throwable, rest: List[Throwable] = Nil): CompositeException =
     new CompositeException(first, NonEmptyList(second, rest))
 
-  /** For easy pattern matching a `CompositeException`. */
+  /**
+   * For easy pattern matching a `CompositeException`. */
   def unapplySeq(ref: CompositeException): Option[Seq[Throwable]] =
     Some(ref.head :: ref.tail.toList)
 }

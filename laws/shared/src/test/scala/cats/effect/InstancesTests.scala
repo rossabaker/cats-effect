@@ -35,10 +35,12 @@ class InstancesTests extends BaseTestsSuite {
     }
   )
 
-  checkAllAsync("OptionT[IO, *]", implicit ec => {
-    implicit val cs: ContextShift[IO] = ec.ioContextShift
-    ConcurrentTests[OptionT[IO, *]].concurrent[Int, Int, Int]
-  })
+  checkAllAsync("OptionT[IO, *]",
+                implicit ec => {
+                  implicit val cs: ContextShift[IO] = ec.ioContextShift
+                  ConcurrentTests[OptionT[IO, *]].concurrent[Int, Int, Int]
+                }
+  )
 
   checkAllAsync(
     "OptionT[IO, *]",
@@ -48,10 +50,12 @@ class InstancesTests extends BaseTestsSuite {
     }
   )
 
-  checkAllAsync("Kleisli[IO, *]", implicit ec => {
-    implicit val cs: ContextShift[IO] = ec.ioContextShift
-    ConcurrentTests[Kleisli[IO, Int, *]].concurrent[Int, Int, Int]
-  })
+  checkAllAsync("Kleisli[IO, *]",
+                implicit ec => {
+                  implicit val cs: ContextShift[IO] = ec.ioContextShift
+                  ConcurrentTests[Kleisli[IO, Int, *]].concurrent[Int, Int, Int]
+                }
+  )
 
   checkAllAsync("Kleisli[IO, *]", implicit ec => BracketTests[Kleisli[IO, Int, *], Throwable].bracket[Int, Int, Int])
 
@@ -87,10 +91,12 @@ class InstancesTests extends BaseTestsSuite {
     }
   )
 
-  checkAllAsync("IorT[IO, Int, *]", implicit ec => {
-    implicit val cs: ContextShift[IO] = ec.ioContextShift
-    ConcurrentTests[IorT[IO, Int, *]].concurrent[Int, Int, Int]
-  })
+  checkAllAsync("IorT[IO, Int, *]",
+                implicit ec => {
+                  implicit val cs: ContextShift[IO] = ec.ioContextShift
+                  ConcurrentTests[IorT[IO, Int, *]].concurrent[Int, Int, Int]
+                }
+  )
 
   checkAllAsync(
     "IorT[IO, Int, *]",
@@ -101,7 +107,8 @@ class InstancesTests extends BaseTestsSuite {
   )
 
   checkAllAsync("ReaderWriterStateT[IO, S, *]",
-                implicit ec => AsyncTests[ReaderWriterStateT[IO, Int, Int, Int, *]].async[Int, Int, Int])
+                implicit ec => AsyncTests[ReaderWriterStateT[IO, Int, Int, Int, *]].async[Int, Int, Int]
+  )
 
   checkAllAsync(
     "ReaderWriterStateT[IO, S, *]",
@@ -121,8 +128,8 @@ class InstancesTests extends BaseTestsSuite {
   implicit def stateTEq[F[_]: FlatMap, S: Monoid, A](implicit FSA: Eq[F[(S, A)]]): Eq[StateT[F, S, A]] =
     Eq.by[StateT[F, S, A], F[(S, A)]](state => state.run(Monoid[S].empty))
 
-  implicit def readerWriterStateTEq[F[_]: Monad, E: Monoid, L, S: Monoid, A](
-    implicit FLSA: Eq[F[(L, S, A)]]
+  implicit def readerWriterStateTEq[F[_]: Monad, E: Monoid, L, S: Monoid, A](implicit
+    FLSA: Eq[F[(L, S, A)]]
   ): Eq[ReaderWriterStateT[F, E, L, S, A]] =
     Eq.by(_.run(Monoid[E].empty, Monoid[S].empty))
 }

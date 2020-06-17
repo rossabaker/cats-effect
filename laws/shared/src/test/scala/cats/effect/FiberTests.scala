@@ -33,20 +33,26 @@ class FiberTests extends BaseTestsSuite {
   implicit def fiberEq[F[_]: Applicative, A](implicit FA: Eq[F[A]]): Eq[Fiber[F, A]] =
     Eq.by[Fiber[F, A], F[A]](_.join)
 
-  checkAllAsync("Fiber[IO, *]", implicit ec => {
-    implicit val cs: ContextShift[IO] = ec.ioContextShift
-    ApplicativeTests[Fiber[IO, *]].applicative[Int, Int, Int]
-  })
+  checkAllAsync("Fiber[IO, *]",
+                implicit ec => {
+                  implicit val cs: ContextShift[IO] = ec.ioContextShift
+                  ApplicativeTests[Fiber[IO, *]].applicative[Int, Int, Int]
+                }
+  )
 
-  checkAllAsync("Fiber[IO, *]", implicit ec => {
-    implicit val cs: ContextShift[IO] = ec.ioContextShift
-    SemigroupTests[Fiber[IO, Int]](Fiber.fiberSemigroup[IO, Int]).semigroup
-  })
+  checkAllAsync("Fiber[IO, *]",
+                implicit ec => {
+                  implicit val cs: ContextShift[IO] = ec.ioContextShift
+                  SemigroupTests[Fiber[IO, Int]](Fiber.fiberSemigroup[IO, Int]).semigroup
+                }
+  )
 
-  checkAllAsync("Fiber[IO, *]", implicit ec => {
-    implicit val cs: ContextShift[IO] = ec.ioContextShift
-    MonoidTests[Fiber[IO, Int]].monoid
-  })
+  checkAllAsync("Fiber[IO, *]",
+                implicit ec => {
+                  implicit val cs: ContextShift[IO] = ec.ioContextShift
+                  MonoidTests[Fiber[IO, Int]].monoid
+                }
+  )
 
   testAsync("Canceling join does not cancel the source fiber") { implicit ec =>
     implicit val cs: ContextShift[IO] = ec.ioContextShift

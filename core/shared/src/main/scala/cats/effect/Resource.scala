@@ -166,8 +166,7 @@ sealed abstract class Resource[+F[_], +A] {
    *             .parMapN((s1, s2) => s"I have \$s1 and \$s2")
    *             .use(msg => IO(println(msg)))
    * }}}
-   *
-   **/
+   */
   def parZip[G[x] >: F[x]: Sync: Parallel, B](
     that: Resource[G[?], B]
   ): Resource[G[?], (A, B)] = {
@@ -208,7 +207,8 @@ sealed abstract class Resource[+F[_], +A] {
   private[effect] def mapK[G[x] >: F[x], H[_]](f: G ~> H,
                                                B: Bracket[G, Throwable],
                                                D: Defer[H],
-                                               G: Applicative[H]): Resource[H, A] =
+                                               G: Applicative[H]
+  ): Resource[H, A] =
     this.mapK[G, H](f)(D, G)
 
   /**
@@ -248,7 +248,6 @@ sealed abstract class Resource[+F[_], +A] {
    * and `after` methods of many test frameworks), or complex library
    * code that needs to modify or move the finalizer for an existing
    * resource.
-   *
    */
   def allocated[G[x] >: F[x], B >: A](implicit F: Bracket[G[?], Throwable]): G[(B, G[Unit])] = {
     // Indirection for calling `loop` needed because `loop` must be @tailrec
@@ -259,7 +258,8 @@ sealed abstract class Resource[+F[_], +A] {
     // Maintains its own stack for dealing with Bind chains
     @tailrec def loop(current: Resource[G, Any],
                       stack: List[Any => Resource[G, Any]],
-                      release: G[Unit]): G[(Any, G[Unit])] =
+                      release: G[Unit]
+    ): G[(Any, G[Unit])] =
       current match {
         case a: Allocate[G, Any] =>
           F.bracketCase(a.resource) {
@@ -496,7 +496,6 @@ object Resource extends ResourceInstances with ResourcePlatform {
    * Alexander Konovalov, chosen because it's devoid of boxing issues and
    * a good choice until opaque types will land in Scala.
    * [[https://github.com/alexknvl/newtypes alexknvl/newtypes]].
-   *
    */
   type Par[+F[_], +A] = Par.Type[F, A]
 
@@ -531,8 +530,8 @@ abstract private[effect] class ResourceInstances extends ResourceInstances0 {
       def F1 = F10
     }
 
-  implicit def catsEffectCommutativeApplicativeForResourcePar[F[_]](
-    implicit F: Sync[F],
+  implicit def catsEffectCommutativeApplicativeForResourcePar[F[_]](implicit
+    F: Sync[F],
     P: Parallel[F]
   ): CommutativeApplicative[Resource.Par[F, *]] =
     new ResourceParCommutativeApplicative[F] {
@@ -554,15 +553,19 @@ abstract private[effect] class ResourceInstances0 {
       def F = F0
     }
 
-  implicit def catsEffectSemigroupForResource[F[_], A](implicit F0: Monad[F],
-                                                       A0: Semigroup[A]): ResourceSemigroup[F, A] =
+  implicit def catsEffectSemigroupForResource[F[_], A](implicit
+    F0: Monad[F],
+    A0: Semigroup[A]
+  ): ResourceSemigroup[F, A] =
     new ResourceSemigroup[F, A] {
       def A = A0
       def F = F0
     }
 
-  implicit def catsEffectSemigroupKForResource[F[_], A](implicit F0: Monad[F],
-                                                        K0: SemigroupK[F]): ResourceSemigroupK[F] =
+  implicit def catsEffectSemigroupKForResource[F[_], A](implicit
+    F0: Monad[F],
+    K0: SemigroupK[F]
+  ): ResourceSemigroupK[F] =
     new ResourceSemigroupK[F] {
       def F = F0
       def K = K0
@@ -588,7 +591,8 @@ abstract private[effect] class ResourceMonadError[F[_], E] extends ResourceMonad
                  r match {
                    case Left(error) => Resource.pure[F, Either[E, A]](Left(error))
                    case Right(s)    => attempt(fs(s))
-                 })
+                 }
+          )
         })
       case Suspend(resource) =>
         Suspend(resource.attempt.map {

@@ -44,9 +44,7 @@ class MVarConcurrentTests extends BaseMVarTests {
       r3 <- mVar.take
     } yield Set(r1, r3)
 
-    for (r <- task.unsafeToFuture()) yield {
-      r shouldBe Set(1, 3)
-    }
+    for (r <- task.unsafeToFuture()) yield r shouldBe Set(1, 3)
   }
 
   test("take is cancelable") {
@@ -63,9 +61,7 @@ class MVarConcurrentTests extends BaseMVarTests {
       r3 <- t3.join
     } yield Set(r1, r3)
 
-    for (r <- task.unsafeToFuture()) yield {
-      r shouldBe Set(1, 3)
-    }
+    for (r <- task.unsafeToFuture()) yield r shouldBe Set(1, 3)
   }
 
   test("read is cancelable") {
@@ -80,9 +76,7 @@ class MVarConcurrentTests extends BaseMVarTests {
       v <- IO.race(finished.get, fallback)
     } yield v
 
-    for (r <- task.unsafeToFuture()) yield {
-      r shouldBe Right(0)
-    }
+    for (r <- task.unsafeToFuture()) yield r shouldBe Right(0)
   }
 }
 
@@ -116,9 +110,7 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
       r2 <- av.take
     } yield (isE1, isE2, r1, r2)
 
-    for (r <- task.unsafeToFuture()) yield {
-      r shouldBe ((true, false, 10, 20))
-    }
+    for (r <- task.unsafeToFuture()) yield r shouldBe ((true, false, 10, 20))
   }
 
   test("empty; tryPut; tryPut; tryTake; tryTake; put; take") {
@@ -134,9 +126,7 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
       r3 <- av.take
     } yield (isE1, p1, p2, isE2, r1, r2, r3)
 
-    for (r <- task.unsafeToFuture()) yield {
-      r shouldBe ((true, true, false, false, Some(10), None, 20))
-    }
+    for (r <- task.unsafeToFuture()) yield r shouldBe ((true, true, false, false, Some(10), None, 20))
   }
 
   test("empty; take; put; take; put") {
@@ -150,9 +140,7 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
       r2 <- f2.join
     } yield Set(r1, r2)
 
-    for (r <- task.unsafeToFuture()) yield {
-      r shouldBe Set(10, 20)
-    }
+    for (r <- task.unsafeToFuture()) yield r shouldBe Set(10, 20)
   }
 
   test("empty; put; put; put; take; take; take") {
@@ -169,9 +157,7 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
       _ <- f3.join
     } yield Set(r1, r2, r3)
 
-    for (r <- task.unsafeToFuture()) yield {
-      r shouldBe Set(10, 20, 30)
-    }
+    for (r <- task.unsafeToFuture()) yield r shouldBe Set(10, 20, 30)
   }
 
   test("empty; take; take; take; put; put; put") {
@@ -188,9 +174,7 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
       r3 <- f3.join
     } yield Set(r1, r2, r3)
 
-    for (r <- task.unsafeToFuture()) yield {
-      r shouldBe Set(10, 20, 30)
-    }
+    for (r <- task.unsafeToFuture()) yield r shouldBe Set(10, 20, 30)
   }
 
   test("initial; take; put; take") {
@@ -202,9 +186,7 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
       r2 <- av.take
     } yield (isE, r1, r2)
 
-    for (v <- task.unsafeToFuture()) yield {
-      v shouldBe ((false, 10, 20))
-    }
+    for (v <- task.unsafeToFuture()) yield v shouldBe ((false, 10, 20))
   }
 
   test("initial; read; take") {
@@ -214,9 +196,7 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
       take <- av.take
     } yield read + take
 
-    for (v <- task.unsafeToFuture()) yield {
-      v shouldBe 20
-    }
+    for (v <- task.unsafeToFuture()) yield v shouldBe 20
   }
 
   test("empty; read; put") {
@@ -227,9 +207,7 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
       r <- read.join
     } yield r
 
-    for (v <- task.unsafeToFuture()) yield {
-      v shouldBe 10
-    }
+    for (v <- task.unsafeToFuture()) yield v shouldBe 10
   }
 
   test("empty; tryRead; read; put; tryRead; read") {
@@ -242,9 +220,7 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
       r <- read.join
     } yield (tryReadEmpty, tryReadContains, r)
 
-    for (v <- task.unsafeToFuture()) yield {
-      v shouldBe ((None, Some(10), 10))
-    }
+    for (v <- task.unsafeToFuture()) yield v shouldBe ((None, Some(10), 10))
   }
 
   test("empty; put; swap; read") {
@@ -256,18 +232,14 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
       _ <- fiber.join
     } yield (newValue, oldValue)
 
-    for (v <- task.unsafeToFuture()) yield {
-      v shouldBe ((20, 10))
-    }
+    for (v <- task.unsafeToFuture()) yield v shouldBe ((20, 10))
   }
 
   test("put(null) works") {
     val task = empty[String].flatMap { mvar =>
       mvar.put(null) *> mvar.read
     }
-    for (v <- task.unsafeToFuture()) yield {
-      v shouldBe null
-    }
+    for (v <- task.unsafeToFuture()) yield v shouldBe null
   }
 
   test("producer-consumer parallel loop") {
@@ -303,9 +275,7 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
     } yield sum
 
     // Evaluate
-    for (r <- sumTask.unsafeToFuture()) yield {
-      r shouldBe (count.toLong * (count - 1) / 2)
-    }
+    for (r <- sumTask.unsafeToFuture()) yield r shouldBe (count.toLong * (count - 1) / 2)
   }
 
   test("stack overflow test") {
@@ -336,9 +306,7 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
     }
 
     val task = init(Option(0)).flatMap(exec)
-    for (r <- task.unsafeToFuture()) yield {
-      r shouldBe count.toLong * (count - 1) / 2
-    }
+    for (r <- task.unsafeToFuture()) yield r shouldBe count.toLong * (count - 1) / 2
   }
 
   test("take/put test is stack safe") {
@@ -352,9 +320,7 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
     val count = if (Platform.isJvm) 10000 else 5000
     val task = init(1).flatMap(loop(count, 0))
 
-    for (r <- task.unsafeToFuture()) yield {
-      r shouldBe count
-    }
+    for (r <- task.unsafeToFuture()) yield r shouldBe count
   }
 
   def testStackSequential(channel: MVar2[IO, Int]): (Int, IO[Int], IO[Unit]) = {
@@ -384,9 +350,7 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
       r <- reads
     } yield r == count
 
-    for (r <- task.unsafeToFuture()) yield {
-      r shouldBe true
-    }
+    for (r <- task.unsafeToFuture()) yield r shouldBe true
   }
 
   test("take is stack safe when repeated sequentially") {
@@ -398,9 +362,7 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
       r <- fr.join
     } yield r == count
 
-    for (r <- task.unsafeToFuture()) yield {
-      r shouldBe true
-    }
+    for (r <- task.unsafeToFuture()) yield r shouldBe true
   }
 
   test("concurrent take and put") {
@@ -408,10 +370,11 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
     val task = for {
       mVar <- empty[Int]
       ref <- Ref[IO].of(0)
-      takes = (0 until count)
-        .map(_ => IO.shift *> mVar.read.map2(mVar.take)(_ + _).flatMap(x => ref.update(_ + x)))
-        .toList
-        .parSequence
+      takes =
+        (0 until count)
+          .map(_ => IO.shift *> mVar.read.map2(mVar.take)(_ + _).flatMap(x => ref.update(_ + x)))
+          .toList
+          .parSequence
       puts = (0 until count).map(_ => IO.shift *> mVar.put(1)).toList.parSequence
       fiber1 <- takes.start
       fiber2 <- puts.start
@@ -420,8 +383,6 @@ abstract class BaseMVarTests extends AsyncFunSuite with Matchers {
       r <- ref.get
     } yield r
 
-    for (r <- task.unsafeToFuture()) yield {
-      r shouldBe count * 2
-    }
+    for (r <- task.unsafeToFuture()) yield r shouldBe count * 2
   }
 }

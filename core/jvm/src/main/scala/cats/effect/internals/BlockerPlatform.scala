@@ -77,7 +77,8 @@ private[effect] trait BlockerPlatform {
    */
   def liftExecutionContext(ec: ExecutionContext): Blocker
 
-  /** Thrown if there are tasks queued in the thread pool at the time a `Blocker` is finalized. */
+  /**
+   * Thrown if there are tasks queued in the thread pool at the time a `Blocker` is finalized. */
   final class OutstandingTasksAtShutdown(val tasks: NonEmptyList[Runnable])
       extends IllegalStateException("There were outstanding tasks at time of shutdown of the thread pool")
 }

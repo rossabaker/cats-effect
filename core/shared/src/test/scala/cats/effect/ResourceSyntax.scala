@@ -24,11 +24,10 @@ object Test {
   def fDerived[F[+_]](implicit F: Sync[F]): F[Either[Derived, Nothing]] = F.delay(Left(Derived()))
 
   def f[F[+_]](implicit F: Sync[F]): F[Either[Base, Nothing]] =
-    if (true) {
+    if (true)
       fBase
-    } else {
+    else
       fDerived
-    }
 
   def g2[F[+_, +_]](implicit F: Sync[F[Throwable, ?]]): Resource[F[Throwable, ?], Either[Base, Nothing]] =
     Resource

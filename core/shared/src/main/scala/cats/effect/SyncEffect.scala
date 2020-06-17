@@ -35,9 +35,10 @@ trait SyncEffect[F[_]] extends Sync[F] {
   /**
    * [[SyncEffect.runSync]] as a natural transformation.
    */
-  def runSyncK[G[_]](implicit G: Sync[G]): F ~> G = new (F ~> G) {
-    def apply[A](fa: F[A]): G[A] = runSync[G, A](fa)
-  }
+  def runSyncK[G[_]](implicit G: Sync[G]): F ~> G =
+    new (F ~> G) {
+      def apply[A](fa: F[A]): G[A] = runSync[G, A](fa)
+    }
 }
 
 object SyncEffect {

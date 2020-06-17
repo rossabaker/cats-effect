@@ -46,9 +46,7 @@ class IOAsyncTests extends AsyncFunSuite with Matchers {
       case Left(e)  => IO { effect.failure(e); () }
     }
 
-    for (_ <- io.toIO.unsafeToFuture(); v <- attempt.future) yield {
-      v shouldEqual expected
-    }
+    for (_ <- io.toIO.unsafeToFuture(); v <- attempt.future) yield v shouldEqual expected
   }
 
   test("IO.pure#runAsync") {
@@ -76,16 +74,12 @@ class IOAsyncTests extends AsyncFunSuite with Matchers {
   test("IO.sleep(10.ms)") {
     val io = IO.sleep(10.millis).map(_ => 10)
 
-    for (r <- io.unsafeToFuture()) yield {
-      r shouldBe 10
-    }
+    for (r <- io.unsafeToFuture()) yield r shouldBe 10
   }
 
   test("IO.sleep(negative)") {
     val io = IO.sleep(-10.seconds).map(_ => 10)
 
-    for (r <- io.unsafeToFuture()) yield {
-      r shouldBe 10
-    }
+    for (r <- io.unsafeToFuture()) yield r shouldBe 10
   }
 }

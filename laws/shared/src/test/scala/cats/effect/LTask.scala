@@ -33,17 +33,20 @@ case class LTask[A](run: ExecutionContext => Future[A])
 
 object LTask {
 
-  /** For testing laws with ScalaCheck. */
+  /**
+   * For testing laws with ScalaCheck. */
   implicit def arbitrary[A](implicit A: Arbitrary[IO[A]]): Arbitrary[LTask[A]] =
     Arbitrary(A.arbitrary.map { io =>
       LTask(_ => io.unsafeToFuture())
     })
 
-  /** For testing laws with ScalaCheck. */
+  /**
+   * For testing laws with ScalaCheck. */
   implicit def cogenForLTask[A]: Cogen[LTask[A]] =
     Cogen[Unit].contramap(_ => ())
 
-  /** For testing laws with ScalaCheck. */
+  /**
+   * For testing laws with ScalaCheck. */
   implicit def eqForLTask[A](implicit A: Eq[Future[A]], ec: TestContext): Eq[LTask[A]] =
     new Eq[LTask[A]] {
       def eqv(x: LTask[A], y: LTask[A]): Boolean = {
@@ -54,7 +57,8 @@ object LTask {
       }
     }
 
-  /** Instances for `LTask`. */
+  /**
+   * Instances for `LTask`. */
   implicit def effectInstance(implicit ec: ExecutionContext): Effect[LTask] =
     new Effect[LTask] {
       def pure[A](x: A): LTask[A] =
@@ -118,10 +122,12 @@ object LTask {
         for {
           a <- acquire
           etb <- attempt(use(a))
-          _ <- release(a, etb match {
-            case Left(e)  => ExitCase.error[Throwable](e)
-            case Right(_) => ExitCase.complete
-          })
+          _ <- release(a,
+                       etb match {
+                         case Left(e)  => ExitCase.error[Throwable](e)
+                         case Right(_) => ExitCase.complete
+                       }
+          )
           b <- rethrow(pure(etb))
         } yield b
     }

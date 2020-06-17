@@ -32,7 +32,8 @@ final private[effect] class MVarAsync[F[_], A] private (initial: MVarAsync.State
     extends MVar2[F, A] {
   import MVarAsync._
 
-  /** Shared mutable state. */
+  /**
+   * Shared mutable state. */
   private[this] val stateRef = new AtomicReference[State[A]](initial)
 
   def put(a: A): F[Unit] =
@@ -57,12 +58,13 @@ final private[effect] class MVarAsync[F[_], A] private (initial: MVarAsync.State
   def read: F[A] =
     F.async(unsafeRead)
 
-  def tryRead: F[Option[A]] = F.delay {
-    stateRef.get match {
-      case WaitForTake(value, _) => Some(value)
-      case WaitForPut(_, _)      => None
+  def tryRead: F[Option[A]] =
+    F.delay {
+      stateRef.get match {
+        case WaitForTake(value, _) => Some(value)
+        case WaitForPut(_, _)      => None
+      }
     }
-  }
 
   def swap(newValue: A): F[A] =
     F.flatMap(take) { oldValue =>
@@ -93,13 +95,12 @@ final private[effect] class MVarAsync[F[_], A] private (initial: MVarAsync.State
             else WaitForPut(Queue.empty, rest)
           }
 
-        if (!stateRef.compareAndSet(current, update)) {
+        if (!stateRef.compareAndSet(current, update))
           unsafeTryPut(a) // retry
-        } else if ((first ne null) || reads.nonEmpty) {
+        else if ((first ne null) || reads.nonEmpty)
           streamPutAndReads(a, reads, first)
-        } else {
+        else
           F.pure(true)
-        }
     }
 
   @tailrec
@@ -107,11 +108,10 @@ final private[effect] class MVarAsync[F[_], A] private (initial: MVarAsync.State
     stateRef.get match {
       case current @ WaitForTake(value, puts) =>
         val update = WaitForTake(value, puts.enqueue(a -> onPut))
-        if (!stateRef.compareAndSet(current, update)) {
+        if (!stateRef.compareAndSet(current, update))
           unsafePut(a)(onPut) // retry
-        } else {
+        else
           F.unit
-        }
 
       case current @ WaitForPut(reads, takes) =>
         var first: Listener[A] = null
@@ -124,11 +124,10 @@ final private[effect] class MVarAsync[F[_], A] private (initial: MVarAsync.State
             else WaitForPut(Queue.empty, rest)
           }
 
-        if (!stateRef.compareAndSet(current, update)) {
+        if (!stateRef.compareAndSet(current, update))
           unsafePut(a)(onPut) // retry
-        } else {
+        else
           F.map(streamPutAndReads(a, reads, first))(_ => onPut(rightUnit))
-        }
     }
 
   @tailrec
@@ -136,23 +135,21 @@ final private[effect] class MVarAsync[F[_], A] private (initial: MVarAsync.State
     val current: State[A] = stateRef.get
     current match {
       case WaitForTake(value, queue) =>
-        if (queue.isEmpty) {
+        if (queue.isEmpty)
           if (stateRef.compareAndSet(current, State.empty))
             F.pure(Some(value))
-          else {
+          else
             unsafeTryTake() // retry
-          }
-        } else {
+        else {
           val ((ax, awaitPut), xs) = queue.dequeue
           val update = WaitForTake(ax, xs)
-          if (stateRef.compareAndSet(current, update)) {
+          if (stateRef.compareAndSet(current, update))
             F.map(lightAsyncBoundary) { _ =>
               awaitPut(rightUnit)
               Some(value)
             }
-          } else {
+          else
             unsafeTryTake() // retry
-          }
         }
       case WaitForPut(_, _) =>
         pureNone
@@ -164,34 +161,31 @@ final private[effect] class MVarAsync[F[_], A] private (initial: MVarAsync.State
     val current: State[A] = stateRef.get
     current match {
       case WaitForTake(value, queue) =>
-        if (queue.isEmpty) {
+        if (queue.isEmpty)
           if (stateRef.compareAndSet(current, State.empty)) {
             // Signals completion of `take`
             onTake(Right(value))
             F.unit
-          } else {
+          } else
             unsafeTake(onTake) // retry
-          }
-        } else {
+        else {
           val ((ax, awaitPut), xs) = queue.dequeue
           val update = WaitForTake(ax, xs)
-          if (stateRef.compareAndSet(current, update)) {
+          if (stateRef.compareAndSet(current, update))
             // Complete the `put` request waiting on a notification
             F.map(lightAsyncBoundary) { _ =>
               try awaitPut(rightUnit)
               finally onTake(Right(value))
             }
-          } else {
+          else
             unsafeTake(onTake) // retry
-          }
         }
 
       case WaitForPut(reads, takes) =>
-        if (!stateRef.compareAndSet(current, WaitForPut(reads, takes.enqueue(onTake)))) {
+        if (!stateRef.compareAndSet(current, WaitForPut(reads, takes.enqueue(onTake))))
           unsafeTake(onTake)
-        } else {
+        else
           F.unit
-        }
     }
   }
 
@@ -206,9 +200,8 @@ final private[effect] class MVarAsync[F[_], A] private (initial: MVarAsync.State
 
       case WaitForPut(reads, takes) =>
         // No value available, enqueue the callback
-        if (!stateRef.compareAndSet(current, WaitForPut(reads.enqueue(onRead), takes))) {
+        if (!stateRef.compareAndSet(current, WaitForPut(reads.enqueue(onRead), takes)))
           unsafeRead(onRead) // retry
-        }
     }
   }
 
@@ -239,11 +232,13 @@ final private[effect] class MVarAsync[F[_], A] private (initial: MVarAsync.State
 
 private[effect] object MVarAsync {
 
-  /** Builds an [[MVarAsync]] instance with an `initial` value. */
+  /**
+   * Builds an [[MVarAsync]] instance with an `initial` value. */
   def apply[F[_], A](initial: A)(implicit F: Async[F]): MVar2[F, A] =
     new MVarAsync[F, A](State(initial))
 
-  /** Returns an empty [[MVarAsync]] instance. */
+  /**
+   * Returns an empty [[MVarAsync]] instance. */
   def empty[F[_], A](implicit F: Async[F]): MVar2[F, A] =
     new MVarAsync[F, A](State.empty)
 
@@ -253,15 +248,18 @@ private[effect] object MVarAsync {
    */
   private type Listener[-A] = Either[Nothing, A] => Unit
 
-  /** ADT modelling the internal state of `MVar`. */
+  /**
+   * ADT modelling the internal state of `MVar`. */
   sealed private trait State[A]
 
-  /** Private [[State]] builders.*/
+  /**
+   * Private [[State]] builders. */
   private object State {
     private[this] val ref = WaitForPut[Any](Queue.empty, Queue.empty)
     def apply[A](a: A): State[A] = WaitForTake(a, Queue.empty)
 
-    /** `Empty` state, reusing the same instance. */
+    /**
+     * `Empty` state, reusing the same instance. */
     def empty[A]: State[A] = ref.asInstanceOf[State[A]]
   }
 

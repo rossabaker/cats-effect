@@ -40,16 +40,20 @@ private[effect] object Callback {
       case _       => ()
     }
 
-  /** Reusable `Right(())` reference. */
+  /**
+   * Reusable `Right(())` reference. */
   val rightUnit = Right(())
 
-  /** Reusable `Success(())` reference. */
+  /**
+   * Reusable `Success(())` reference. */
   val successUnit = Success(())
 
-  /** Reusable no-op, side-effectful `Function1` reference. */
+  /**
+   * Reusable no-op, side-effectful `Function1` reference. */
   val dummy1: Any => Unit = _ => ()
 
-  /** Builds a callback with async execution. */
+  /**
+   * Builds a callback with async execution. */
   def async[A](cb: T[A]): T[A] =
     async(null, cb)
 
@@ -91,7 +95,8 @@ private[effect] object Callback {
       ()
   }
 
-  /** Helpers async callbacks. */
+  /**
+   * Helpers async callbacks. */
   implicit final class Extensions[-A](val self: T[A]) extends AnyVal {
 
     /**

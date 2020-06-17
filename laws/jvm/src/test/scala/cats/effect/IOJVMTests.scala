@@ -136,9 +136,8 @@ class IOJVMTests extends AnyFunSuite with Matchers {
       val th = thread.get()
       th.join(1000 * 10) // 10 seconds
 
-      if (th.isAlive) {
+      if (th.isAlive)
         fail("thread is still active")
-      }
     } finally {
       val th = thread.get()
       if (th != null && th.isAlive)

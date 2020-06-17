@@ -33,30 +33,30 @@ private[effect] object IORace {
                         main: IOConnection,
                         other: IOConnection,
                         cb: Callback.T[Either[T, U]],
-                        r: Either[T, U]): Unit =
-      if (isActive.getAndSet(false)) {
+                        r: Either[T, U]
+    ): Unit =
+      if (isActive.getAndSet(false))
         // First interrupts the other task
         other.cancel.unsafeRunAsync { r2 =>
           main.pop()
           cb(Right(r))
           maybeReport(r2)
         }
-      }
 
     def onError[T](active: AtomicBoolean,
                    cb: Callback.T[T],
                    main: IOConnection,
                    other: IOConnection,
-                   err: Throwable): Unit =
-      if (active.getAndSet(false)) {
+                   err: Throwable
+    ): Unit =
+      if (active.getAndSet(false))
         other.cancel.unsafeRunAsync { r2 =>
           main.pop()
           maybeReport(r2)
           cb(Left(err))
         }
-      } else {
+      else
         Logger.reportFailure(err)
-      }
 
     val start: Start[Either[A, B]] = (conn, cb) => {
       val active = new AtomicBoolean(true)
@@ -69,20 +69,26 @@ private[effect] object IORace {
       conn.pushPair(connL, connR)
 
       // Starts concurrent execution for the left value
-      IORunLoop.startCancelable[A](IOForkedStart(lh, cs), connL, {
-        case Right(a) =>
-          onSuccess(active, conn, connR, cb, Left(a))
-        case Left(err) =>
-          onError(active, cb, conn, connR, err)
-      })
+      IORunLoop.startCancelable[A](IOForkedStart(lh, cs),
+                                   connL,
+                                   {
+                                     case Right(a) =>
+                                       onSuccess(active, conn, connR, cb, Left(a))
+                                     case Left(err) =>
+                                       onError(active, cb, conn, connR, err)
+                                   }
+      )
 
       // Starts concurrent execution for the right value
-      IORunLoop.startCancelable[B](IOForkedStart(rh, cs), connR, {
-        case Right(b) =>
-          onSuccess(active, conn, connL, cb, Right(b))
-        case Left(err) =>
-          onError(active, cb, conn, connL, err)
-      })
+      IORunLoop.startCancelable[B](IOForkedStart(rh, cs),
+                                   connR,
+                                   {
+                                     case Right(b) =>
+                                       onSuccess(active, conn, connL, cb, Right(b))
+                                     case Left(err) =>
+                                       onError(active, cb, conn, connL, err)
+                                   }
+      )
     }
 
     IO.Async(start, trampolineAfter = true)
@@ -110,7 +116,8 @@ private[effect] object IORace {
       // Starts concurrent execution for the left value
       IORunLoop.startCancelable[A](
         IOForkedStart(lh, cs),
-        connL, {
+        connL,
+        {
           case Right(a) =>
             if (active.getAndSet(false)) {
               conn.pop()
@@ -120,13 +127,13 @@ private[effect] object IORace {
               ()
             }
           case Left(err) =>
-            if (active.getAndSet(false)) {
+            if (active.getAndSet(false))
               connR.cancel.unsafeRunAsync { r2 =>
                 conn.pop()
                 maybeReport(r2)
                 cb(Left(err))
               }
-            } else {
+            else {
               promiseL.trySuccess(Left(err))
               ()
             }
@@ -136,7 +143,8 @@ private[effect] object IORace {
       // Starts concurrent execution for the right value
       IORunLoop.startCancelable[B](
         IOForkedStart(rh, cs),
-        connR, {
+        connR,
+        {
           case Right(b) =>
             if (active.getAndSet(false)) {
               conn.pop()
@@ -147,13 +155,13 @@ private[effect] object IORace {
             }
 
           case Left(err) =>
-            if (active.getAndSet(false)) {
+            if (active.getAndSet(false))
               connL.cancel.unsafeRunAsync { r2 =>
                 conn.pop()
                 maybeReport(r2)
                 cb(Left(err))
               }
-            } else {
+            else {
               promiseR.trySuccess(Left(err))
               ()
             }

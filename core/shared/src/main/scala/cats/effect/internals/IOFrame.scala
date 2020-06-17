@@ -18,7 +18,8 @@ package cats.effect.internals
 
 import cats.effect.IO
 
-/** A mapping function that is also able to handle errors,
+/**
+ * A mapping function that is also able to handle errors,
  * being the equivalent of:
  *
  * ```
@@ -42,7 +43,8 @@ abstract private[effect] class IOFrame[-A, +R] extends (A => R) { self =>
 
 private[effect] object IOFrame {
 
-  /** [[IOFrame]] reference that only handles errors, useful for
+  /**
+   * [[IOFrame]] reference that only handles errors, useful for
    * quick filtering of `onErrorHandleWith` frames.
    */
   final class ErrorHandler[A](fe: Throwable => IO[A]) extends IOFrame[A, IO[A]] {
@@ -50,13 +52,15 @@ private[effect] object IOFrame {
     def apply(a: A): IO[A] = IO.pure(a)
   }
 
-  /** Used by [[IO.redeem]]. */
+  /**
+   * Used by [[IO.redeem]]. */
   final class Redeem[A, B](fe: Throwable => B, fs: A => B) extends IOFrame[A, IO[B]] {
     def apply(a: A): IO[B] = IO.pure(fs(a))
     def recover(e: Throwable): IO[B] = IO.pure(fe(e))
   }
 
-  /** Used by [[IO.redeemWith]]. */
+  /**
+   * Used by [[IO.redeemWith]]. */
   final class RedeemWith[A, B](fe: Throwable => IO[B], fs: A => IO[B]) extends IOFrame[A, IO[B]] {
     def apply(a: A): IO[B] = fs(a)
     def recover(e: Throwable): IO[B] = fe(e)

@@ -135,7 +135,7 @@ private[effect] object IORunLoop {
           }
       }
 
-      if (hasUnboxed) {
+      if (hasUnboxed)
         popNextBind(bFirst, bRest) match {
           case null =>
             cb(Right(unboxed))
@@ -149,7 +149,6 @@ private[effect] object IORunLoop {
             bFirst = null
             currentIO = fa
         }
-      }
 
       // Auto-cancellation logic
       currentIndex += 1
@@ -200,9 +199,8 @@ private[effect] object IORunLoop {
 
         case Suspend(thunk) =>
           currentIO =
-            try {
-              thunk()
-            } catch { case NonFatal(ex) => RaiseError(ex) }
+            try thunk()
+            catch { case NonFatal(ex) => RaiseError(ex) }
 
         case RaiseError(ex) =>
           findErrorHandler(bFirst, bRest) match {
@@ -230,7 +228,7 @@ private[effect] object IORunLoop {
           return suspendAsync(currentIO.asInstanceOf[IO[A]], bFirst, bRest)
       }
 
-      if (hasUnboxed) {
+      if (hasUnboxed)
         popNextBind(bFirst, bRest) match {
           case null =>
             return (if (currentIO ne null) currentIO else Pure(unboxed))
@@ -244,7 +242,6 @@ private[effect] object IORunLoop {
             bFirst = null
             currentIO = fa
         }
-      }
       true
     }) ()
     // $COVERAGE-OFF$
@@ -271,11 +268,10 @@ private[effect] object IORunLoop {
     if (bRest eq null) return null
     while ({
       val next = bRest.pop()
-      if (next eq null) {
+      if (next eq null)
         return null
-      } else if (!next.isInstanceOf[IOFrame.ErrorHandler[_]]) {
+      else if (!next.isInstanceOf[IOFrame.ErrorHandler[_]])
         return next
-      }
       true
     }) ()
     // $COVERAGE-OFF$
@@ -376,9 +372,8 @@ private[effect] object IORunLoop {
         if (trampolineAfter) {
           this.value = either
           ec.execute(this)
-        } else {
+        } else
           signal(either)
-        }
       }
   }
 

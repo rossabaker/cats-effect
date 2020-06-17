@@ -112,9 +112,7 @@ abstract class BaseSemaphoreJVMTests(parallelism: Int) extends AnyFunSuite with 
         } yield ()
 
         assert(task.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-      } finally {
-        cancelLoop.set(true)
-      }
+      } finally cancelLoop.set(true)
     }
   }
 
@@ -133,9 +131,7 @@ abstract class BaseSemaphoreJVMTests(parallelism: Int) extends AnyFunSuite with 
         } yield ()
 
         assert(task.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-      } finally {
-        cancelLoop.set(true)
-      }
+      } finally cancelLoop.set(true)
     }
   }
 
@@ -154,9 +150,8 @@ abstract class BaseSemaphoreJVMTests(parallelism: Int) extends AnyFunSuite with 
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("Semaphore (concurrent) — issue #380: with cooperative light async boundaries; with no latch") {
@@ -172,9 +167,8 @@ abstract class BaseSemaphoreJVMTests(parallelism: Int) extends AnyFunSuite with 
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("Semaphore (concurrent) — issue #380: with cooperative full async boundaries; with latch") {
@@ -192,9 +186,8 @@ abstract class BaseSemaphoreJVMTests(parallelism: Int) extends AnyFunSuite with 
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("Semaphore (concurrent) — issue #380: with cooperative full async boundaries; with no latch") {
@@ -210,9 +203,8 @@ abstract class BaseSemaphoreJVMTests(parallelism: Int) extends AnyFunSuite with 
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("Semaphore (async) — issue #380: with foreverM and latch") {
@@ -232,9 +224,7 @@ abstract class BaseSemaphoreJVMTests(parallelism: Int) extends AnyFunSuite with 
         } yield ()
 
         assert(task.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-      } finally {
-        cancelLoop.set(true)
-      }
+      } finally cancelLoop.set(true)
     }
   }
 
@@ -253,9 +243,7 @@ abstract class BaseSemaphoreJVMTests(parallelism: Int) extends AnyFunSuite with 
         } yield ()
 
         assert(task.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-      } finally {
-        cancelLoop.set(true)
-      }
+      } finally cancelLoop.set(true)
     }
   }
 
@@ -274,9 +262,8 @@ abstract class BaseSemaphoreJVMTests(parallelism: Int) extends AnyFunSuite with 
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("Semaphore (async) — issue #380: with cooperative light async boundaries and no latch") {
@@ -292,9 +279,8 @@ abstract class BaseSemaphoreJVMTests(parallelism: Int) extends AnyFunSuite with 
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("Semaphore (async) — issue #380: with cooperative full async boundaries and latch") {
@@ -312,9 +298,8 @@ abstract class BaseSemaphoreJVMTests(parallelism: Int) extends AnyFunSuite with 
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("Semaphore (async) — issue #380: with cooperative full async boundaries and no latch") {
@@ -330,8 +315,7 @@ abstract class BaseSemaphoreJVMTests(parallelism: Int) extends AnyFunSuite with 
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 }

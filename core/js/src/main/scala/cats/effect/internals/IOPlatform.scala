@@ -54,7 +54,8 @@ private[effect] object IOPlatform {
    */
   final val fusionMaxStackDepth = 31
 
-  /** Returns `true` if the underlying platform is the JVM,
+  /**
+   * Returns `true` if the underlying platform is the JVM,
    * `false` if it's JavaScript. */
   final val isJVM = false
 

@@ -123,9 +123,7 @@ class DeferredTests extends AsyncFunSuite with Matchers {
         fb <- (latch.complete(()) *> d.get *> foreverAsync(0)).start
         _ <- latch.get
         _ <- d.complete(()).timeout(15.seconds).guarantee(fb.cancel)
-      } yield {
-        Succeeded
-      }
+      } yield Succeeded
 
       task.flatMap { r =>
         if (times > 0) execute(times - 1)
@@ -144,9 +142,7 @@ class DeferredTests extends AsyncFunSuite with Matchers {
         fb <- (latch.complete(()) *> d.get *> IO.unit.foreverM).start
         _ <- latch.get
         _ <- d.complete(()).timeout(15.seconds).guarantee(fb.cancel)
-      } yield {
-        Succeeded
-      }
+      } yield Succeeded
 
       task.flatMap { r =>
         if (times > 0) execute(times - 1)

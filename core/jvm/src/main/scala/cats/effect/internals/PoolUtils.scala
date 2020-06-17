@@ -44,24 +44,24 @@ private[internals] object PoolUtils {
     exitOnFatal(ExecutionContext.fromExecutor(executor))
   }
 
-  def exitOnFatal(ec: ExecutionContext): ExecutionContext = new ExecutionContext {
-    def execute(r: Runnable): Unit =
-      ec.execute(new Runnable {
-        def run(): Unit =
-          try {
-            r.run()
-          } catch {
-            case NonFatal(t) =>
-              reportFailure(t)
+  def exitOnFatal(ec: ExecutionContext): ExecutionContext =
+    new ExecutionContext {
+      def execute(r: Runnable): Unit =
+        ec.execute(new Runnable {
+          def run(): Unit =
+            try r.run()
+            catch {
+              case NonFatal(t) =>
+                reportFailure(t)
 
-            case t: Throwable =>
-              // under most circumstances, this will work even with fatal errors
-              t.printStackTrace()
-              System.exit(1)
-          }
-      })
+              case t: Throwable =>
+                // under most circumstances, this will work even with fatal errors
+                t.printStackTrace()
+                System.exit(1)
+            }
+        })
 
-    def reportFailure(t: Throwable): Unit =
-      ec.reportFailure(t)
-  }
+      def reportFailure(t: Throwable): Unit =
+        ec.reportFailure(t)
+    }
 }

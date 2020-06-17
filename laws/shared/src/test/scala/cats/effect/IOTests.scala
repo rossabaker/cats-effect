@@ -35,24 +35,30 @@ import scala.util.{Failure, Success, Try}
 import scala.concurrent.duration._
 
 class IOTests extends BaseTestsSuite {
-  checkAllAsync("IO", implicit ec => {
-    implicit val cs: ContextShift[IO] = ec.ioContextShift
-    ConcurrentEffectTests[IO].concurrentEffect[Int, Int, Int]
-  })
+  checkAllAsync("IO",
+                implicit ec => {
+                  implicit val cs: ContextShift[IO] = ec.ioContextShift
+                  ConcurrentEffectTests[IO].concurrentEffect[Int, Int, Int]
+                }
+  )
 
   checkAllAsync("IO", implicit ec => MonoidTests[IO[Int]].monoid)
   checkAllAsync("IO", implicit ec => SemigroupKTests[IO].semigroupK[Int])
   checkAllAsync("IO", implicit ec => AlignTests[IO].align[Int, Int, Int, Int])
 
-  checkAllAsync("IO.Par", implicit ec => {
-    implicit val cs: ContextShift[IO] = ec.ioContextShift
-    CommutativeApplicativeTests[IO.Par].commutativeApplicative[Int, Int, Int]
-  })
+  checkAllAsync("IO.Par",
+                implicit ec => {
+                  implicit val cs: ContextShift[IO] = ec.ioContextShift
+                  CommutativeApplicativeTests[IO.Par].commutativeApplicative[Int, Int, Int]
+                }
+  )
 
-  checkAllAsync("IO.Par", implicit ec => {
-    implicit val cs: ContextShift[IO] = ec.ioContextShift
-    AlignTests[IO.Par].align[Int, Int, Int, Int]
-  })
+  checkAllAsync("IO.Par",
+                implicit ec => {
+                  implicit val cs: ContextShift[IO] = ec.ioContextShift
+                  AlignTests[IO.Par].align[Int, Int, Int, Int]
+                }
+  )
 
   checkAllAsync(
     "IO",
@@ -65,10 +71,12 @@ class IOTests extends BaseTestsSuite {
     }
   )
 
-  checkAllAsync("IO(Effect defaults)", implicit ec => {
-    implicit val ioEffect: Effect[IO] = IOTests.ioEffectDefaults
-    EffectTests[IO].effect[Int, Int, Int]
-  })
+  checkAllAsync("IO(Effect defaults)",
+                implicit ec => {
+                  implicit val ioEffect: Effect[IO] = IOTests.ioEffectDefaults
+                  EffectTests[IO].effect[Int, Int, Int]
+                }
+  )
 
   checkAllAsync(
     "IO(ConcurrentEffect defaults)",
@@ -462,12 +470,13 @@ class IOTests extends BaseTestsSuite {
 
   testAsync("async.to[IO] is stack-safe if the source is") { implicit ec =>
     // Stack-safe async IO required
-    def async(a: Int) = IO.async[Int] { cb =>
-      ec.execute(new Runnable {
-        def run(): Unit =
-          cb(Right(a))
-      })
-    }
+    def async(a: Int) =
+      IO.async[Int] { cb =>
+        ec.execute(new Runnable {
+          def run(): Unit =
+            cb(Right(a))
+        })
+      }
 
     val f = repeatedTransformLoop(10000, async(99)).unsafeToFuture()
     ec.tick()
@@ -1126,9 +1135,10 @@ class IOTests extends BaseTestsSuite {
 
     val fa = for {
       pa <- Deferred[IO, Unit]
-      fibA <- IO.unit
-        .bracket(_ => IO.unit.guarantee(pa.complete(()) >> IO.sleep(2.second)))(_ => IO.unit)
-        .start
+      fibA <-
+        IO.unit
+          .bracket(_ => IO.unit.guarantee(pa.complete(()) >> IO.sleep(2.second)))(_ => IO.unit)
+          .start
       _ <- pa.get
       _ <- fibA.cancel
     } yield ()
@@ -1148,9 +1158,10 @@ class IOTests extends BaseTestsSuite {
 
     val fa = for {
       pa <- Deferred[IO, Unit]
-      fiber <- IO.unit
-        .bracket(_ => (pa.complete(()) >> IO.never).guarantee(IO.sleep(2.second)))(_ => IO.unit)
-        .start
+      fiber <-
+        IO.unit
+          .bracket(_ => (pa.complete(()) >> IO.never).guarantee(IO.sleep(2.second)))(_ => IO.unit)
+          .start
       _ <- pa.get
       _ <- IO.race(fiber.cancel, fiber.cancel)
     } yield ()
@@ -1231,10 +1242,12 @@ class IOTests extends BaseTestsSuite {
 
 object IOTests {
 
-  /** Implementation for testing default methods. */
+  /**
+   * Implementation for testing default methods. */
   val ioEffectDefaults = new IODefaults
 
-  /** Implementation for testing default methods. */
+  /**
+   * Implementation for testing default methods. */
   def ioConcurrentEffectDefaults(implicit ec: ExecutionContext) =
     new IODefaults with ConcurrentEffect[IO] {
       implicit val cs: ContextShift[IO] = IO.contextShift(ec)

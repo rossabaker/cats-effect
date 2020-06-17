@@ -42,8 +42,8 @@ private[effect] object IOParMap {
                                               fb: IO[B],
                                               f: (A, B) => C,
                                               conn: IOConnection,
-                                              cb: Callback.T[C])
-      extends Runnable {
+                                              cb: Callback.T[C]
+  ) extends Runnable {
 
     /**
      * State synchronized by an atomic reference. Possible values:
@@ -58,7 +58,8 @@ private[effect] object IOParMap {
      */
     private[this] val state = new AtomicReference[AnyRef]()
 
-    /** Callback for the left task. */
+    /**
+     * Callback for the left task. */
     private def callbackA(connB: IOConnection): Callback.T[A] = {
       case Left(e)  => sendError(connB, e)
       case Right(a) =>
@@ -75,7 +76,8 @@ private[effect] object IOParMap {
         }
     }
 
-    /** Callback for the right task. */
+    /**
+     * Callback for the right task. */
     def callbackB(connA: IOConnection): Callback.T[B] = {
       case Left(e)  => sendError(connA, e)
       case Right(b) =>
@@ -92,7 +94,8 @@ private[effect] object IOParMap {
         }
     }
 
-    /** Called when both results are ready. */
+    /**
+     * Called when both results are ready. */
     def complete(a: A, b: B): Unit = {
       conn.pop()
       cb(
@@ -101,7 +104,8 @@ private[effect] object IOParMap {
       )
     }
 
-    /** Called when an error is generated. */
+    /**
+     * Called when an error is generated. */
     private def sendError(other: IOConnection, e: Throwable): Unit =
       state.getAndSet(e) match {
         case _: Throwable =>
