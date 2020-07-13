@@ -48,7 +48,8 @@ private[effect] class LinkedMap[K, +V](
                     .get(k)
                     .map { case (_, id) => insertionOrder - id }
                     .getOrElse(insertionOrder),
-                  nextId)
+                  nextId
+    )
 
   /** The keys in this map, in the order they were added. */
   def keys: Iterable[K] = insertionOrder.values

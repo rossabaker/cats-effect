@@ -114,20 +114,20 @@ private[effect] trait IOAppCompanionPlatform {
      * blocked until both resources are fully released, permitting a
      * graceful shutdown of the application.
      */
-    final override def main(args: Array[String]): Unit = synchronized {
-      val mainIO = executionContextResource.use { ec =>
-        schedulerResource.use { sc =>
-          val init = SyncIO {
-            if (!currentContext.compareAndSet(ClosedContext, new Context(ec, sc))) {
-              throw new IllegalStateException("IOApp already in use!")
+    final override def main(args: Array[String]): Unit =
+      synchronized {
+        val mainIO = executionContextResource.use { ec =>
+          schedulerResource.use { sc =>
+            val init = SyncIO {
+              if (!currentContext.compareAndSet(ClosedContext, new Context(ec, sc)))
+                throw new IllegalStateException("IOApp already in use!")
             }
+            val shutdown = SyncIO(currentContext.set(ClosedContext))
+            init.bracket(_ => SyncIO(super.main(args)))(_ => shutdown)
           }
-          val shutdown = SyncIO(currentContext.set(ClosedContext))
-          init.bracket(_ => SyncIO(super.main(args)))(_ => shutdown)
         }
+        mainIO.unsafeRunSync()
       }
-      mainIO.unsafeRunSync()
-    }
   }
 
   private[this] val defaultScheduler: Resource[SyncIO, ScheduledExecutorService] =

@@ -63,12 +63,10 @@ final private[effect] class ForwardCancelable private () {
           // If `init`, then `cancel` was not triggered yet
           if (!state.compareAndSet(current, Active(value)))
             complete(value)
-        } else {
-          if (!state.compareAndSet(current, finished))
-            complete(value)
-          else
-            execute(value, stack)
-        }
+        } else if (!state.compareAndSet(current, finished))
+          complete(value)
+        else
+          execute(value, stack)
     }
 }
 
@@ -105,9 +103,8 @@ private[effect] object ForwardCancelable {
       def run(): Unit =
         token.unsafeRunAsync { r =>
           for (cb <- stack)
-            try {
-              cb(r)
-            } catch {
+            try cb(r)
+            catch {
               // $COVERAGE-OFF$
               case NonFatal(e) => Logger.reportFailure(e)
               // $COVERAGE-ON$

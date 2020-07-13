@@ -109,9 +109,11 @@ object Timer {
    * Derives a [[Timer]] instance for `cats.data.WriterT`,
    * given we have one for `F[_]`.
    */
-  implicit def deriveWriterT[F[_], L](implicit F: Applicative[F],
-                                      L: Monoid[L],
-                                      timer: Timer[F]): Timer[WriterT[F, L, *]] =
+  implicit def deriveWriterT[F[_], L](implicit
+    F: Applicative[F],
+    L: Monoid[L],
+    timer: Timer[F]
+  ): Timer[WriterT[F, L, *]] =
     new Timer[WriterT[F, L, *]] {
       val clock: Clock[WriterT[F, L, *]] = Clock.deriveWriterT
 
@@ -172,9 +174,10 @@ object Timer {
     /**
      * Modify the context `F` using transformation `f`.
      */
-    def mapK[G[_]](f: F ~> G): Timer[G] = new Timer[G] {
-      val clock: Clock[G] = self.clock.mapK(f)
-      def sleep(duration: FiniteDuration): G[Unit] = f(self.sleep(duration))
-    }
+    def mapK[G[_]](f: F ~> G): Timer[G] =
+      new Timer[G] {
+        val clock: Clock[G] = self.clock.mapK(f)
+        def sleep(duration: FiniteDuration): G[Unit] = f(self.sleep(duration))
+      }
   }
 }

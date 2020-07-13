@@ -185,9 +185,7 @@ abstract class BaseMVarJVMTests(parallelism: Int) extends AnyFunSuite with Match
         } yield ()
 
         assert(task.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-      } finally {
-        cancelLoop.set(true)
-      }
+      } finally cancelLoop.set(true)
     }
   }
 
@@ -206,9 +204,7 @@ abstract class BaseMVarJVMTests(parallelism: Int) extends AnyFunSuite with Match
         } yield ()
 
         assert(task.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-      } finally {
-        cancelLoop.set(true)
-      }
+      } finally cancelLoop.set(true)
     }
   }
 
@@ -227,9 +223,8 @@ abstract class BaseMVarJVMTests(parallelism: Int) extends AnyFunSuite with Match
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("MVar (concurrent) — issue #380: with cooperative light async boundaries; without latch") {
@@ -245,9 +240,8 @@ abstract class BaseMVarJVMTests(parallelism: Int) extends AnyFunSuite with Match
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("MVar (concurrent) — issue #380: with cooperative full async boundaries; with latch") {
@@ -265,9 +259,8 @@ abstract class BaseMVarJVMTests(parallelism: Int) extends AnyFunSuite with Match
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("MVar (concurrent) — issue #380: with cooperative full async boundaries; without latch") {
@@ -283,9 +276,8 @@ abstract class BaseMVarJVMTests(parallelism: Int) extends AnyFunSuite with Match
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("MVar (async) — issue #380: with foreverM; with latch") {
@@ -305,9 +297,7 @@ abstract class BaseMVarJVMTests(parallelism: Int) extends AnyFunSuite with Match
         } yield ()
 
         assert(task.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-      } finally {
-        cancelLoop.set(true)
-      }
+      } finally cancelLoop.set(true)
     }
   }
 
@@ -326,9 +316,7 @@ abstract class BaseMVarJVMTests(parallelism: Int) extends AnyFunSuite with Match
         } yield ()
 
         assert(task.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-      } finally {
-        cancelLoop.set(true)
-      }
+      } finally cancelLoop.set(true)
     }
   }
 
@@ -347,9 +335,8 @@ abstract class BaseMVarJVMTests(parallelism: Int) extends AnyFunSuite with Match
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("MVar (async) — issue #380: with cooperative light async boundaries; without latch") {
@@ -365,9 +352,8 @@ abstract class BaseMVarJVMTests(parallelism: Int) extends AnyFunSuite with Match
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("MVar (async) — issue #380: with cooperative full async boundaries; with latch") {
@@ -385,8 +371,7 @@ abstract class BaseMVarJVMTests(parallelism: Int) extends AnyFunSuite with Match
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 }

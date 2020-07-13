@@ -28,7 +28,8 @@ trait SyncEffectLaws[F[_]] extends SyncLaws[F] {
 }
 
 object SyncEffectLaws {
-  def apply[F[_]](implicit F0: SyncEffect[F]): SyncEffectLaws[F] = new SyncEffectLaws[F] {
-    val F = F0
-  }
+  def apply[F[_]](implicit F0: SyncEffect[F]): SyncEffectLaws[F] =
+    new SyncEffectLaws[F] {
+      val F = F0
+    }
 }

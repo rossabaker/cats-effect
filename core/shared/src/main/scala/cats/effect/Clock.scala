@@ -144,10 +144,11 @@ object Clock extends LowPriorityImplicits {
     /**
      * Modify the context `F` using transformation `f`.
      */
-    def mapK[G[_]](f: F ~> G): Clock[G] = new Clock[G] {
-      def realTime(unit: TimeUnit): G[Long] = f(self.realTime(unit))
-      def monotonic(unit: TimeUnit): G[Long] = f(self.monotonic(unit))
-    }
+    def mapK[G[_]](f: F ~> G): Clock[G] =
+      new Clock[G] {
+        def realTime(unit: TimeUnit): G[Long] = f(self.realTime(unit))
+        def monotonic(unit: TimeUnit): G[Long] = f(self.monotonic(unit))
+      }
   }
 }
 
@@ -196,9 +197,11 @@ protected[effect] trait LowPriorityImplicits extends LowerPriorityImplicits {
    * Derives a [[Clock]] instance for `cats.data.WriterT`,
    * given we have one for `F[_]`.
    */
-  implicit def deriveWriterT[F[_], L](implicit F: Applicative[F],
-                                      L: Monoid[L],
-                                      clock: Clock[F]): Clock[WriterT[F, L, *]] =
+  implicit def deriveWriterT[F[_], L](implicit
+    F: Applicative[F],
+    L: Monoid[L],
+    clock: Clock[F]
+  ): Clock[WriterT[F, L, *]] =
     new Clock[WriterT[F, L, *]] {
       def realTime(unit: TimeUnit): WriterT[F, L, Long] =
         WriterT.liftF(clock.realTime(unit))

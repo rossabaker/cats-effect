@@ -118,10 +118,12 @@ object LTask {
         for {
           a <- acquire
           etb <- attempt(use(a))
-          _ <- release(a, etb match {
-            case Left(e)  => ExitCase.error[Throwable](e)
-            case Right(_) => ExitCase.complete
-          })
+          _ <- release(a,
+                       etb match {
+                         case Left(e)  => ExitCase.error[Throwable](e)
+                         case Right(_) => ExitCase.complete
+                       }
+          )
           b <- rethrow(pure(etb))
         } yield b
     }

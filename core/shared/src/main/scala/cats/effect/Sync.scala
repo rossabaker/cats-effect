@@ -124,21 +124,20 @@ object Sync {
       EitherT.liftF(Ref.of[F, Option[L]](None)).flatMap { ref =>
         EitherT(
           F.bracketCase(acquire.value) {
-              case Right(a)    => use(a).value
-              case l @ Left(_) => F.pure(l.rightCast[B])
-            } {
-              case (Left(_), _) => F.unit //Nothing to release
-              case (Right(a), ExitCase.Completed) =>
-                release(a, ExitCase.Completed).value.flatMap {
-                  case Left(l)  => ref.set(Some(l))
-                  case Right(_) => F.unit
-                }
-              case (Right(a), res) => release(a, res).value.void
-            }
-            .flatMap[Either[L, B]] {
-              case r @ Right(_) => ref.get.map(_.fold(r: Either[L, B])(Either.left[L, B]))
-              case l @ Left(_)  => F.pure(l)
-            }
+            case Right(a)    => use(a).value
+            case l @ Left(_) => F.pure(l.rightCast[B])
+          } {
+            case (Left(_), _) => F.unit //Nothing to release
+            case (Right(a), ExitCase.Completed) =>
+              release(a, ExitCase.Completed).value.flatMap {
+                case Left(l)  => ref.set(Some(l))
+                case Right(_) => F.unit
+              }
+            case (Right(a), res) => release(a, res).value.void
+          }.flatMap[Either[L, B]] {
+            case r @ Right(_) => ref.get.map(_.fold(r: Either[L, B])(Either.left[L, B]))
+            case l @ Left(_)  => F.pure(l)
+          }
         )
       }
 
@@ -173,21 +172,20 @@ object Sync {
       OptionT.liftF(Ref.of[F, Boolean](false)).flatMap { ref =>
         OptionT(
           F.bracketCase(acquire.value) {
-              case Some(a) => use(a).value
-              case None    => F.pure(Option.empty[B])
-            } {
-              case (None, _) => F.unit //Nothing to release
-              case (Some(a), ExitCase.Completed) =>
-                release(a, ExitCase.Completed).value.flatMap {
-                  case None    => ref.set(true)
-                  case Some(_) => F.unit
-                }
-              case (Some(a), res) => release(a, res).value.void
-            }
-            .flatMap[Option[B]] {
-              case s @ Some(_) => ref.get.map(b => if (b) None else s)
-              case None        => F.pure(None)
-            }
+            case Some(a) => use(a).value
+            case None    => F.pure(Option.empty[B])
+          } {
+            case (None, _) => F.unit //Nothing to release
+            case (Some(a), ExitCase.Completed) =>
+              release(a, ExitCase.Completed).value.flatMap {
+                case None    => ref.set(true)
+                case Some(_) => F.unit
+              }
+            case (Some(a), res) => release(a, res).value.void
+          }.flatMap[Option[B]] {
+            case s @ Some(_) => ref.get.map(b => if (b) None else s)
+            case None        => F.pure(None)
+          }
         )
       }
 
@@ -221,18 +219,17 @@ object Sync {
       StateT.liftF(Ref.of[F, Option[S]](None)).flatMap { ref =>
         StateT { startS =>
           F.bracketCase[(S, A), (S, B)](acquire.run(startS)) {
-              case (s, a) =>
-                use(a).run(s).flatTap { case (s, _) => ref.set(Some(s)) }
-            } {
-              case ((oldS, a), ExitCase.Completed) =>
-                ref.get
-                  .map(_.getOrElse(oldS))
-                  .flatMap(s => release(a, ExitCase.Completed).runS(s))
-                  .flatMap(s => ref.set(Some(s)))
-              case ((s, a), br) =>
-                release(a, br).run(s).void
-            }
-            .flatMap { case (s, b) => ref.get.map(_.getOrElse(s)).tupleRight(b) }
+            case (s, a) =>
+              use(a).run(s).flatTap { case (s, _) => ref.set(Some(s)) }
+          } {
+            case ((oldS, a), ExitCase.Completed) =>
+              ref.get
+                .map(_.getOrElse(oldS))
+                .flatMap(s => release(a, ExitCase.Completed).runS(s))
+                .flatMap(s => ref.set(Some(s)))
+            case ((s, a), br) =>
+              release(a, br).run(s).void
+          }.flatMap { case (s, b) => ref.get.map(_.getOrElse(s)).tupleRight(b) }
         }
       }
 
@@ -268,18 +265,17 @@ object Sync {
       WriterT(
         Ref[F].of(L.empty).flatMap { ref =>
           F.bracketCase(acquire.run) { la =>
-              WriterT(la.pure[F]).flatMap(use).run
-            } {
-              case ((_, a), ec) =>
-                val r = release(a, ec).run
-                if (ec == ExitCase.Completed)
-                  r.flatMap { case (l, _) => ref.set(l) }
-                else
-                  r.void
-            }
-            .flatMap { lb =>
-              ref.get.map(l => lb.leftMap(_ |+| l))
-            }
+            WriterT(la.pure[F]).flatMap(use).run
+          } {
+            case ((_, a), ec) =>
+              val r = release(a, ec).run
+              if (ec == ExitCase.Completed)
+                r.flatMap { case (l, _) => ref.set(l) }
+              else
+                r.void
+          }.flatMap { lb =>
+            ref.get.map(l => lb.leftMap(_ |+| l))
+          }
         }
       )
 
@@ -338,23 +334,22 @@ object Sync {
     )(use: A => IorT[F, L, B])(release: (A, ExitCase[Throwable]) => IorT[F, L, Unit]): IorT[F, L, B] =
       IorT.liftF(Ref[F].of(().rightIor[L])).flatMapF { ref =>
         F.bracketCase(acquire.value) { ia =>
-            IorT.fromIor[F](ia).flatMap(use).value
-          } { (ia, ec) =>
-            ia.toOption.fold(F.unit) { a =>
-              val r = release(a, ec).value
-              if (ec == ExitCase.Completed)
-                r.flatMap {
-                  case Ior.Right(_) => F.unit
-                  case other        => ref.set(other.void)
-                }
-              else
-                r.void
-            }
+          IorT.fromIor[F](ia).flatMap(use).value
+        } { (ia, ec) =>
+          ia.toOption.fold(F.unit) { a =>
+            val r = release(a, ec).value
+            if (ec == ExitCase.Completed)
+              r.flatMap {
+                case Ior.Right(_) => F.unit
+                case other        => ref.set(other.void)
+              }
+            else
+              r.void
           }
-          .flatMap {
-            case l @ Ior.Left(_) => F.pure(l)
-            case other           => ref.get.map(other <* _)
-          }
+        }.flatMap {
+          case l @ Ior.Left(_) => F.pure(l)
+          case other           => ref.get.map(other <* _)
+        }
       }
 
     def flatMap[A, B](fa: IorT[F, L, A])(f: A => IorT[F, L, B]): IorT[F, L, B] =
@@ -391,23 +386,22 @@ object Sync {
       ReaderWriterStateT.liftF(Ref[F].of[(L, Option[S])]((L.empty, None))).flatMap { ref =>
         ReaderWriterStateT { (e, startS) =>
           F.bracketCase(acquire.run(e, startS)) {
-              case (l, s, a) =>
-                ReaderWriterStateT.pure[F, E, L, S, A](a).tell(l).flatMap(use).run(e, s).flatTap {
-                  case (l, s, _) => ref.set((l, Some(s)))
-                }
-            } {
-              case ((_, oldS, a), ExitCase.Completed) =>
-                ref.get
-                  .map(_._2.getOrElse(oldS))
-                  .flatMap(s => release(a, ExitCase.Completed).run(e, s))
-                  .flatMap { case (l, s, _) => ref.set((l, Some(s))) }
-              case ((_, s, a), ec) =>
-                release(a, ec).run(e, s).void
-            }
-            .flatMap {
-              case (l, s, b) =>
-                ref.get.map { case (l2, s2) => (l |+| l2, s2.getOrElse(s), b) }
-            }
+            case (l, s, a) =>
+              ReaderWriterStateT.pure[F, E, L, S, A](a).tell(l).flatMap(use).run(e, s).flatTap {
+                case (l, s, _) => ref.set((l, Some(s)))
+              }
+          } {
+            case ((_, oldS, a), ExitCase.Completed) =>
+              ref.get
+                .map(_._2.getOrElse(oldS))
+                .flatMap(s => release(a, ExitCase.Completed).run(e, s))
+                .flatMap { case (l, s, _) => ref.set((l, Some(s))) }
+            case ((_, s, a), ec) =>
+              release(a, ec).run(e, s).void
+          }.flatMap {
+            case (l, s, b) =>
+              ref.get.map { case (l2, s2) => (l |+| l2, s2.getOrElse(s), b) }
+          }
         }
       }
 

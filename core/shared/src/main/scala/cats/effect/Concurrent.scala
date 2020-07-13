@@ -435,8 +435,10 @@ object Concurrent {
    * @param fallback is the task evaluated after the duration has passed and
    *        the source canceled
    */
-  def timeoutTo[F[_], A](fa: F[A], duration: FiniteDuration, fallback: F[A])(implicit F: Concurrent[F],
-                                                                             timer: Timer[F]): F[A] =
+  def timeoutTo[F[_], A](fa: F[A], duration: FiniteDuration, fallback: F[A])(implicit
+    F: Concurrent[F],
+    timer: Timer[F]
+  ): F[A] =
     F.race(fa, timer.sleep(duration)).flatMap {
       case Left(a)  => F.pure(a)
       case Right(_) => fallback
@@ -627,8 +629,9 @@ object Concurrent {
   /**
    * Like `Parallel.parTraverse`, but limits the degree of parallelism.
    */
-  def parTraverseN[T[_]: Traverse, M[_], A, B](n: Long)(ta: T[A])(f: A => M[B])(implicit M: Concurrent[M],
-                                                                                P: Parallel[M]): M[T[B]] =
+  def parTraverseN[T[_]: Traverse, M[_], A, B](
+    n: Long
+  )(ta: T[A])(f: A => M[B])(implicit M: Concurrent[M], P: Parallel[M]): M[T[B]] =
     for {
       semaphore <- Semaphore(n)(M)
       tb <- ta.parTraverse { a =>
@@ -695,7 +698,8 @@ object Concurrent {
       EitherT.liftF(F.start(fa.value).map(fiberT))
 
     override def racePair[A, B](fa: EitherT[F, L, A],
-                                fb: EitherT[F, L, B]): EitherT[F, L, Either[(A, Fiber[B]), (Fiber[A], B)]] =
+                                fb: EitherT[F, L, B]
+    ): EitherT[F, L, Either[(A, Fiber[B]), (Fiber[A], B)]] =
       EitherT(F.racePair(fa.value, fb.value).flatMap {
         case Left((value, fiberB)) =>
           value match {
@@ -732,7 +736,8 @@ object Concurrent {
       OptionT.liftF(F.start(fa.value).map(fiberT))
 
     override def racePair[A, B](fa: OptionT[F, A],
-                                fb: OptionT[F, B]): OptionT[F, Either[(A, Fiber[B]), (Fiber[A], B)]] =
+                                fb: OptionT[F, B]
+    ): OptionT[F, Either[(A, Fiber[B]), (Fiber[A], B)]] =
       OptionT(F.racePair(fa.value, fb.value).flatMap {
         case Left((value, fiberB)) =>
           value match {
@@ -771,7 +776,8 @@ object Concurrent {
       })
 
     override def racePair[A, B](fa: WriterT[F, L, A],
-                                fb: WriterT[F, L, B]): WriterT[F, L, Either[(A, Fiber[B]), (Fiber[A], B)]] =
+                                fb: WriterT[F, L, B]
+    ): WriterT[F, L, Either[(A, Fiber[B]), (Fiber[A], B)]] =
       WriterT(F.racePair(fa.run, fb.run).map {
         case Left(((l, value), fiber)) =>
           (l, Left((value, fiberT(fiber))))
@@ -824,7 +830,8 @@ object Concurrent {
       IorT.liftF(F.start(fa.value).map(fiberT))
 
     override def racePair[A, B](fa: IorT[F, L, A],
-                                fb: IorT[F, L, B]): IorT[F, L, Either[(A, Fiber[B]), (Fiber[A], B)]] =
+                                fb: IorT[F, L, B]
+    ): IorT[F, L, Either[(A, Fiber[B]), (Fiber[A], B)]] =
       IorT(F.racePair(fa.value, fb.value).flatMap {
         case Left((value, fiberB)) =>
           value match {

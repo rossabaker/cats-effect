@@ -312,11 +312,12 @@ final class SyncIO[+A] private (private val io: IO[A]) {
   def redeemWith[B](recover: Throwable => SyncIO[B], bind: A => SyncIO[B]): SyncIO[B] =
     new SyncIO(io.redeemWith(t => recover(t).io, a => bind(a).io))
 
-  override def toString: String = io match {
-    case IO.Pure(a)       => s"SyncIO($a)"
-    case IO.RaiseError(e) => s"SyncIO(throw $e)"
-    case _                => "SyncIO$" + System.identityHashCode(this)
-  }
+  override def toString: String =
+    io match {
+      case IO.Pure(a)       => s"SyncIO($a)"
+      case IO.RaiseError(e) => s"SyncIO(throw $e)"
+      case _                => "SyncIO$" + System.identityHashCode(this)
+    }
 }
 
 object SyncIO extends SyncIOInstances {
@@ -362,10 +363,11 @@ object SyncIO extends SyncIOInstances {
    * instances will be converted into thunk-less `SyncIO` (i.e. eager
    * `SyncIO`), while lazy eval and memoized will be executed as such.
    */
-  def eval[A](fa: Eval[A]): SyncIO[A] = fa match {
-    case Now(a) => pure(a)
-    case notNow => apply(notNow.value)
-  }
+  def eval[A](fa: Eval[A]): SyncIO[A] =
+    fa match {
+      case Now(a) => pure(a)
+      case notNow => apply(notNow.value)
+    }
 
   /**
    * Constructs a `SyncIO` which sequences the specified exception.
@@ -407,9 +409,10 @@ abstract private[effect] class SyncIOInstances extends SyncIOLowPriorityInstance
   @deprecated("Signature changed to return SyncEffect", "2.1.0")
   val syncIoSync: Sync[SyncIO] = new SyncIOSync {}
 
-  implicit def syncIoMonoid[A: Monoid]: Monoid[SyncIO[A]] = new SyncIOSemigroup[A] with Monoid[SyncIO[A]] {
-    def empty: SyncIO[A] = SyncIO.pure(Monoid[A].empty)
-  }
+  implicit def syncIoMonoid[A: Monoid]: Monoid[SyncIO[A]] =
+    new SyncIOSemigroup[A] with Monoid[SyncIO[A]] {
+      def empty: SyncIO[A] = SyncIO.pure(Monoid[A].empty)
+    }
 
   implicit val syncIoSemigroupK: SemigroupK[SyncIO] = new SemigroupK[SyncIO] {
     final override def combineK[A](a: SyncIO[A], b: SyncIO[A]): SyncIO[A] =

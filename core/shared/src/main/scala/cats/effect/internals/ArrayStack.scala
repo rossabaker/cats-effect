@@ -47,9 +47,8 @@ final private[internals] class ArrayStack[A <: AnyRef] private (
       newArray(0) = array
       array = newArray
       index = 1
-    } else {
+    } else
       index += 1
-    }
     array(index) = a.asInstanceOf[AnyRef]
   }
 
@@ -65,19 +64,18 @@ final private[internals] class ArrayStack[A <: AnyRef] private (
   def pushAll(stack: ArrayStack[A]): Unit =
     pushAll(stack.iteratorReversed)
 
-  /** Pops an item from the stack (in LIFO order).
+  /**
+   * Pops an item from the stack (in LIFO order).
    *
    * Returns `null` in case the stack is empty.
    */
   def pop(): A = {
-    if (index == 0) {
+    if (index == 0)
       if (array(0) ne null) {
         array = array(0).asInstanceOf[Array[AnyRef]]
         index = modulo
-      } else {
+      } else
         return null.asInstanceOf[A]
-      }
-    }
     val result = array(index).asInstanceOf[A]
     // GC purposes
     array(index) = null

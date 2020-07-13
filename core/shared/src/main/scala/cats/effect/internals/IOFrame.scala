@@ -18,7 +18,8 @@ package cats.effect.internals
 
 import cats.effect.IO
 
-/** A mapping function that is also able to handle errors,
+/**
+ * A mapping function that is also able to handle errors,
  * being the equivalent of:
  *
  * ```
@@ -42,7 +43,8 @@ abstract private[effect] class IOFrame[-A, +R] extends (A => R) { self =>
 
 private[effect] object IOFrame {
 
-  /** [[IOFrame]] reference that only handles errors, useful for
+  /**
+   * [[IOFrame]] reference that only handles errors, useful for
    * quick filtering of `onErrorHandleWith` frames.
    */
   final class ErrorHandler[A](fe: Throwable => IO[A]) extends IOFrame[A, IO[A]] {

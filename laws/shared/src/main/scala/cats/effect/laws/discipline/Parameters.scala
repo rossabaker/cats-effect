@@ -37,7 +37,5 @@ object Parameters {
 
   /** Default parameters. */
   implicit val default: Parameters =
-    Parameters(allowNonTerminationLaws = true, stackSafeIterationsCount = {
-      if (IOPlatform.isJVM) 10000 else 100
-    })
+    Parameters(allowNonTerminationLaws = true, stackSafeIterationsCount = if (IOPlatform.isJVM) 10000 else 100)
 }

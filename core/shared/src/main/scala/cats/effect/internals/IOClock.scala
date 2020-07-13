@@ -22,7 +22,6 @@ import scala.concurrent.duration.{MILLISECONDS, NANOSECONDS, TimeUnit}
 
 /**
  * Internal API, implementation of [[Clock]]
- *
  */
 private[internals] class IOClock extends Clock[IO] {
   final def realTime(unit: TimeUnit): IO[Long] =

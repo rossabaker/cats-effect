@@ -30,27 +30,28 @@ trait BracketTests[F[_], E] extends MonadErrorTests[F, E] {
   def laws: BracketLaws[F, E]
 
   def bracket[A: Arbitrary: Eq, B: Arbitrary: Eq, C: Arbitrary: Eq](implicit
-                                                                    ArbFA: Arbitrary[F[A]],
-                                                                    ArbFB: Arbitrary[F[B]],
-                                                                    ArbFC: Arbitrary[F[C]],
-                                                                    ArbFU: Arbitrary[F[Unit]],
-                                                                    ArbFAtoB: Arbitrary[F[A => B]],
-                                                                    ArbFBtoC: Arbitrary[F[B => C]],
-                                                                    ArbE: Arbitrary[E],
-                                                                    CogenA: Cogen[A],
-                                                                    CogenB: Cogen[B],
-                                                                    CogenC: Cogen[C],
-                                                                    CogenE: Cogen[E],
-                                                                    EqFA: Eq[F[A]],
-                                                                    EqFB: Eq[F[B]],
-                                                                    EqFC: Eq[F[C]],
-                                                                    EqE: Eq[E],
-                                                                    EqFEitherEU: Eq[F[Either[E, Unit]]],
-                                                                    EqFEitherEA: Eq[F[Either[E, A]]],
-                                                                    EqEitherTFEA: Eq[EitherT[F, E, A]],
-                                                                    EqFABC: Eq[F[(A, B, C)]],
-                                                                    EqFInt: Eq[F[Int]],
-                                                                    iso: Isomorphisms[F]): RuleSet =
+    ArbFA: Arbitrary[F[A]],
+    ArbFB: Arbitrary[F[B]],
+    ArbFC: Arbitrary[F[C]],
+    ArbFU: Arbitrary[F[Unit]],
+    ArbFAtoB: Arbitrary[F[A => B]],
+    ArbFBtoC: Arbitrary[F[B => C]],
+    ArbE: Arbitrary[E],
+    CogenA: Cogen[A],
+    CogenB: Cogen[B],
+    CogenC: Cogen[C],
+    CogenE: Cogen[E],
+    EqFA: Eq[F[A]],
+    EqFB: Eq[F[B]],
+    EqFC: Eq[F[C]],
+    EqE: Eq[E],
+    EqFEitherEU: Eq[F[Either[E, Unit]]],
+    EqFEitherEA: Eq[F[Either[E, A]]],
+    EqEitherTFEA: Eq[EitherT[F, E, A]],
+    EqFABC: Eq[F[(A, B, C)]],
+    EqFInt: Eq[F[Int]],
+    iso: Isomorphisms[F]
+  ): RuleSet =
     new RuleSet {
       val name = "bracket"
       val bases = Nil
@@ -74,11 +75,12 @@ trait BracketTests[F[_], E] extends MonadErrorTests[F, E] {
     }
 
   def bracketTrans[M[_], A: Arbitrary: Eq, B: Arbitrary: Eq](fromM: M ~> F)(implicit
-                                                                            ArbFA: Arbitrary[F[A]],
-                                                                            ArbFB: Arbitrary[F[B]],
-                                                                            ArbMU: Arbitrary[M[Unit]],
-                                                                            CogenA: Cogen[A],
-                                                                            EqFB: Eq[F[B]]): RuleSet =
+    ArbFA: Arbitrary[F[A]],
+    ArbFB: Arbitrary[F[B]],
+    ArbMU: Arbitrary[M[Unit]],
+    CogenA: Cogen[A],
+    EqFB: Eq[F[B]]
+  ): RuleSet =
     new RuleSet {
       val name = "bracket"
       val bases = Nil
@@ -91,7 +93,8 @@ trait BracketTests[F[_], E] extends MonadErrorTests[F, E] {
 }
 
 object BracketTests {
-  def apply[F[_], E](implicit ev: Bracket[F, E]): BracketTests[F, E] = new BracketTests[F, E] {
-    def laws = BracketLaws[F, E]
-  }
+  def apply[F[_], E](implicit ev: Bracket[F, E]): BracketTests[F, E] =
+    new BracketTests[F, E] {
+      def laws = BracketLaws[F, E]
+    }
 }

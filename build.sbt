@@ -129,13 +129,14 @@ val commonSettings = Seq(
   // See: https://github.com/scoverage/sbt-scoverage/issues/153
   pomPostProcess := { (node: xml.Node) =>
     new RuleTransformer(new RewriteRule {
-      override def transform(node: xml.Node): Seq[xml.Node] = node match {
-        case e: Elem
-            if e.label == "dependency" && e.child
-              .exists(child => child.label == "groupId" && child.text == "org.scoverage") =>
-          Nil
-        case _ => Seq(node)
-      }
+      override def transform(node: xml.Node): Seq[xml.Node] =
+        node match {
+          case e: Elem
+              if e.label == "dependency" && e.child
+                .exists(child => child.label == "groupId" && child.text == "org.scoverage") =>
+            Nil
+          case _ => Seq(node)
+        }
     }).transform(node).head
   },
   addCompilerPlugin(("org.typelevel" %% "kind-projector" % "0.11.0").cross(CrossVersion.full)),
@@ -398,9 +399,11 @@ val BaseVersion = "2.0.0"
 
 ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/"))
 
-/***********************************************************************\
-                      Boilerplate below these lines
-\***********************************************************************/
+/**
+ * *********************************************************************\
+ *                      Boilerplate below these lines
+ * \**********************************************************************
+ */
 enablePlugins(GitVersioning)
 
 val ReleaseTag = """^v(\d+\.\d+(?:\.\d+(?:[-.]\w+)?)?)$""".r

@@ -60,7 +60,8 @@ trait EffectLaws[F[_]] extends AsyncLaws[F] {
 }
 
 object EffectLaws {
-  def apply[F[_]](implicit F0: Effect[F]): EffectLaws[F] = new EffectLaws[F] {
-    val F = F0
-  }
+  def apply[F[_]](implicit F0: Effect[F]): EffectLaws[F] =
+    new EffectLaws[F] {
+      val F = F0
+    }
 }

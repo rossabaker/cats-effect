@@ -18,7 +18,8 @@ package cats.effect.util
 
 import cats.data.NonEmptyList
 
-/** A composite exception represents a list of exceptions
+/**
+ * A composite exception represents a list of exceptions
  * caught from evaluating multiple independent actions
  * and that need to be signaled together.
  *

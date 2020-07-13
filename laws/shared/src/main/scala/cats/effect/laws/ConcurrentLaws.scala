@@ -161,8 +161,9 @@ trait ConcurrentLaws[F[_]] extends AsyncLaws[F] {
       effect <- Deferred.uncancelable[F, B]
       winner = s.acquire *> F.async[A](_(r))
       loser = F.bracket(s.release)(_ => F.never[A])(_ => effect.complete(b))
-      race = if (leftWinner) F.race(winner, loser)
-      else F.race(loser, winner)
+      race =
+        if (leftWinner) F.race(winner, loser)
+        else F.race(loser, winner)
 
       b <- F.attempt(race) *> effect.get
     } yield b
@@ -215,8 +216,9 @@ trait ConcurrentLaws[F[_]] extends AsyncLaws[F] {
       effect <- Deferred.uncancelable[F, B]
       winner = s.acquire *> F.async[A](_(r))
       loser = F.bracket(s.release)(_ => F.never[A])(_ => effect.complete(b))
-      race = if (leftWinner) F.racePair(winner, loser)
-      else F.racePair(loser, winner)
+      race =
+        if (leftWinner) F.racePair(winner, loser)
+        else F.racePair(loser, winner)
 
       b <- F.attempt(race).flatMap {
         case Right(Left((_, fiber))) =>

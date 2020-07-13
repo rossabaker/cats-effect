@@ -87,7 +87,7 @@ sealed abstract class IO[+A] extends internals.IOBinaryCompat[A] {
   /**
    * Replaces the result of this IO with the given value.
    * The value won't be computed if the IO doesn't succeed.
-   * */
+   */
   def as[B](newValue: => B): IO[B] = map(_ => newValue)
 
   /**
@@ -180,9 +180,10 @@ sealed abstract class IO[+A] extends internals.IOBinaryCompat[A] {
    * @see [[runCancelable]] for the version that gives you a cancelable
    *      token that can be used to send a cancel signal
    */
-  final def runAsync(cb: Either[Throwable, A] => IO[Unit]): SyncIO[Unit] = SyncIO {
-    unsafeRunAsync(cb.andThen(_.unsafeRunAsyncAndForget()))
-  }
+  final def runAsync(cb: Either[Throwable, A] => IO[Unit]): SyncIO[Unit] =
+    SyncIO {
+      unsafeRunAsync(cb.andThen(_.unsafeRunAsyncAndForget()))
+    }
 
   /**
    * Produces an `IO` reference that should execute the source on evaluation,
@@ -431,8 +432,10 @@ sealed abstract class IO[+A] extends internals.IOBinaryCompat[A] {
    *        [[IO.race race]], needed because IO's `race` operation automatically
    *        forks the involved tasks
    */
-  final def timeoutTo[A2 >: A](duration: FiniteDuration, fallback: IO[A2])(implicit timer: Timer[IO],
-                                                                           cs: ContextShift[IO]): IO[A2] =
+  final def timeoutTo[A2 >: A](duration: FiniteDuration, fallback: IO[A2])(implicit
+    timer: Timer[IO],
+    cs: ContextShift[IO]
+  ): IO[A2] =
     Concurrent.timeoutTo(this, duration, fallback)
 
   /**
@@ -459,7 +462,7 @@ sealed abstract class IO[+A] extends internals.IOBinaryCompat[A] {
 
   /**
    * Returns an IO that will delay the execution of the source by the given duration.
-   * */
+   */
   final def delayBy(duration: FiniteDuration)(implicit timer: Timer[IO]): IO[A] =
     timer.sleep(duration) *> this
 
@@ -678,7 +681,7 @@ sealed abstract class IO[+A] extends internals.IOBinaryCompat[A] {
    * Zips both this action and the parameter in parallel.
    * If [[parProduct]] is canceled, both actions are canceled.
    * Failure in either of the IOs will cancel the other one.
-   *  */
+   */
   def parProduct[B](another: IO[B])(implicit p: NonEmptyParallel[IO]): IO[(A, B)] =
     p.sequential(p.apply.product(p.parallel(this), p.parallel(another)))
 
@@ -740,11 +743,12 @@ sealed abstract class IO[+A] extends internals.IOBinaryCompat[A] {
   def redeemWith[B](recover: Throwable => IO[B], bind: A => IO[B]): IO[B] =
     IO.Bind(this, new IOFrame.RedeemWith(recover, bind))
 
-  override def toString: String = this match {
-    case Pure(a)       => s"IO($a)"
-    case RaiseError(e) => s"IO(throw $e)"
-    case _             => "IO$" + System.identityHashCode(this)
-  }
+  override def toString: String =
+    this match {
+      case Pure(a)       => s"IO($a)"
+      case RaiseError(e) => s"IO(throw $e)"
+      case _             => "IO$" + System.identityHashCode(this)
+    }
 
   /*
    * Ignores the result of this IO.
@@ -755,14 +759,14 @@ sealed abstract class IO[+A] extends internals.IOBinaryCompat[A] {
    * Runs the current IO, then runs the parameter, keeping its result.
    * The result of the first action is ignored.
    * If the source fails, the other action won't run.
-   * */
+   */
   def *>[B](another: IO[B]): IO[B] = flatMap(_ => another)
 
   /**
    * Like [[*>]], but keeps the result of the source.
    *
    * For a similar method that also runs the parameter in case of failure or interruption, see [[guarantee]].
-   * */
+   */
   def <*[B](another: IO[B]): IO[A] = flatMap(another.as(_))
 
   /**
@@ -770,13 +774,13 @@ sealed abstract class IO[+A] extends internals.IOBinaryCompat[A] {
    *
    * Failure in either of the IOs will cancel the other one.
    * If the whole computation is canceled, both actions are also canceled.
-   * */
+   */
   def &>[B](another: IO[B])(implicit p: NonEmptyParallel[IO]): IO[B] =
     p.parProductR(this)(another)
 
   /**
    * Like [[&>]], but keeps the result of the source.
-   * */
+   */
   def <&[B](another: IO[B])(implicit p: NonEmptyParallel[IO]): IO[A] =
     p.parProductL(this)(another)
 }
@@ -803,20 +807,21 @@ abstract private[effect] class IOParallelNewtype extends internals.IOTimerRef wi
    */
   object Par extends IONewtype
 
-  private[effect] def ioParAlign(implicit cs: ContextShift[IO]): Align[IO.Par] = new Align[IO.Par] {
-    import IO.Par.{unwrap, apply => par}
+  private[effect] def ioParAlign(implicit cs: ContextShift[IO]): Align[IO.Par] =
+    new Align[IO.Par] {
+      import IO.Par.{unwrap, apply => par}
 
-    def align[A, B](fa: IO.Par[A], fb: IO.Par[B]): IO.Par[Ior[A, B]] = alignWith(fa, fb)(identity)
+      def align[A, B](fa: IO.Par[A], fb: IO.Par[B]): IO.Par[Ior[A, B]] = alignWith(fa, fb)(identity)
 
-    override def alignWith[A, B, C](fa: IO.Par[A], fb: IO.Par[B])(f: Ior[A, B] => C): IO.Par[C] =
-      par(
-        IOParMap(cs, unwrap(fa).attempt, unwrap(fb).attempt)((ea, eb) =>
-          cats.instances.either.catsStdInstancesForEither.alignWith(ea, eb)(f)
-        ).flatMap(IO.fromEither)
-      )
+      override def alignWith[A, B, C](fa: IO.Par[A], fb: IO.Par[B])(f: Ior[A, B] => C): IO.Par[C] =
+        par(
+          IOParMap(cs, unwrap(fa).attempt, unwrap(fb).attempt)((ea, eb) =>
+            cats.instances.either.catsStdInstancesForEither.alignWith(ea, eb)(f)
+          ).flatMap(IO.fromEither)
+        )
 
-    def functor: Functor[IO.Par] = ioParCommutativeApplicative
-  }
+      def functor: Functor[IO.Par] = ioParCommutativeApplicative
+    }
 
   private[effect] def ioParCommutativeApplicative(implicit cs: ContextShift[IO]): CommutativeApplicative[IO.Par] =
     new CommutativeApplicative[IO.Par] {
@@ -956,9 +961,10 @@ abstract private[effect] class IOInstances extends IOLowPriorityInstances {
       final override val parallel: IO ~> IO.Par = λ[IO ~> IO.Par](IO.Par(_))
     }
 
-  implicit def ioMonoid[A: Monoid]: Monoid[IO[A]] = new IOSemigroup[A] with Monoid[IO[A]] {
-    final override def empty: IO[A] = IO.pure(Monoid[A].empty)
-  }
+  implicit def ioMonoid[A: Monoid]: Monoid[IO[A]] =
+    new IOSemigroup[A] with Monoid[IO[A]] {
+      final override def empty: IO[A] = IO.pure(Monoid[A].empty)
+    }
 
   implicit val ioSemigroupK: SemigroupK[IO] = new SemigroupK[IO] {
     final override def combineK[A](a: IO[A], b: IO[A]): IO[A] =
@@ -1163,10 +1169,11 @@ object IO extends IOInstances {
    * instances will be converted into thunk-less `IO` (i.e. eager
    * `IO`), while lazy eval and memoized will be executed as such.
    */
-  def eval[A](fa: Eval[A]): IO[A] = fa match {
-    case Now(a) => pure(a)
-    case notNow => apply(notNow.value)
-  }
+  def eval[A](fa: Eval[A]): IO[A] =
+    fa match {
+      case Now(a) => pure(a)
+      case notNow => apply(notNow.value)
+    }
 
   /**
    * Suspends an asynchronous side effect in `IO`.
@@ -1372,10 +1379,11 @@ object IO extends IOInstances {
   /**
    * Lifts an `Option[A]` into the `IO[A]` context, raising the throwable if the option is empty.
    */
-  def fromOption[A](option: Option[A])(orElse: => Throwable): IO[A] = option match {
-    case None        => raiseError(orElse)
-    case Some(value) => pure(value)
-  }
+  def fromOption[A](option: Option[A])(orElse: => Throwable): IO[A] =
+    option match {
+      case None        => raiseError(orElse)
+      case Some(value) => pure(value)
+    }
 
   /**
    * Lifts an `Try[A]` into the `IO[A]` context, raising the throwable if it

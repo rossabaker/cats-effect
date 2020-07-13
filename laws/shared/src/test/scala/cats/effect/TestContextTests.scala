@@ -81,9 +81,8 @@ class TestContextTests extends BaseTestsSuite {
 
     assert(count === 0)
     var executed = 0
-    while (ec.tickOne()) {
+    while (ec.tickOne())
       executed += 1
-    }
 
     assert(count === 100)
     assert(executed === 100)
@@ -156,12 +155,13 @@ class TestContextTests extends BaseTestsSuite {
   }
 
   testAsync("timer.sleep is cancelable") { ec =>
-    def callback[A](p: Promise[A]): (Either[Throwable, A] => Unit) = r => {
-      p.complete(r match {
-        case Left(e)  => Failure(e)
-        case Right(a) => Success(a)
-      })
-    }
+    def callback[A](p: Promise[A]): (Either[Throwable, A] => Unit) =
+      r => {
+        p.complete(r match {
+          case Left(e)  => Failure(e)
+          case Right(a) => Success(a)
+        })
+      }
 
     val timer = ec.timer[IO]
     val delay = timer.sleep(10.seconds).map(_ => 1)

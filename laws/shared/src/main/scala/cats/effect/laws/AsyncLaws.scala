@@ -105,7 +105,8 @@ trait AsyncLaws[F[_]] extends SyncLaws[F] {
 }
 
 object AsyncLaws {
-  def apply[F[_]](implicit F0: Async[F]): AsyncLaws[F] = new AsyncLaws[F] {
-    val F = F0
-  }
+  def apply[F[_]](implicit F0: Async[F]): AsyncLaws[F] =
+    new AsyncLaws[F] {
+      val F = F0
+    }
 }

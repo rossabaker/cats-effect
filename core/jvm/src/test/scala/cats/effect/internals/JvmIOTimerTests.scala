@@ -28,10 +28,8 @@ class JvmIOTimerTests extends AnyFunSuite with Matchers {
   private def withScheduler(props: Map[String, String])(f: ScheduledThreadPoolExecutor => Unit): Unit = {
     val s = IOTimer.mkGlobalScheduler(props)
     try f(s)
-    finally {
-      try s.shutdownNow()
-      catch { case NonFatal(e) => e.printStackTrace() }
-    }
+    finally try s.shutdownNow()
+    catch { case NonFatal(e) => e.printStackTrace() }
   }
 
   test("global scheduler: default core pool size") {

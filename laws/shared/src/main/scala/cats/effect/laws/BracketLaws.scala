@@ -67,7 +67,8 @@ trait BracketLaws[F[_], E] extends MonadErrorLaws[F, E] {
 }
 
 object BracketLaws {
-  def apply[F[_], E](implicit F0: Bracket[F, E]): BracketLaws[F, E] = new BracketLaws[F, E] {
-    val F = F0
-  }
+  def apply[F[_], E](implicit F0: Bracket[F, E]): BracketLaws[F, E] =
+    new BracketLaws[F, E] {
+      val F = F0
+    }
 }

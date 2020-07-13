@@ -118,9 +118,7 @@ abstract class BaseDeferredJVMTests(parallelism: Int) extends AnyFunSuite with M
         } yield ()
 
         assert(task.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-      } finally {
-        cancelLoop.set(true)
-      }
+      } finally cancelLoop.set(true)
     }
   }
 
@@ -140,9 +138,8 @@ abstract class BaseDeferredJVMTests(parallelism: Int) extends AnyFunSuite with M
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("Deferred (concurrent) — issue #380: with cooperative full async boundaries") {
@@ -161,9 +158,8 @@ abstract class BaseDeferredJVMTests(parallelism: Int) extends AnyFunSuite with M
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("Deferred (async) — issue #380: with foreverM") {
@@ -182,9 +178,7 @@ abstract class BaseDeferredJVMTests(parallelism: Int) extends AnyFunSuite with M
         } yield ()
 
         assert(task.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-      } finally {
-        cancelLoop.set(true)
-      }
+      } finally cancelLoop.set(true)
     }
   }
 
@@ -203,9 +197,8 @@ abstract class BaseDeferredJVMTests(parallelism: Int) extends AnyFunSuite with M
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 
   test("Deferred (async) — issue #380: with cooperative full async boundaries") {
@@ -223,8 +216,7 @@ abstract class BaseDeferredJVMTests(parallelism: Int) extends AnyFunSuite with M
       } yield true
     }
 
-    for (_ <- 0 until iterations) {
+    for (_ <- 0 until iterations)
       assert(run.unsafeRunTimed(timeout).nonEmpty, s"; timed-out after $timeout")
-    }
   }
 }

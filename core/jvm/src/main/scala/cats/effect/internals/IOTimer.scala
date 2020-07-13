@@ -49,9 +49,8 @@ final private[internals] class IOTimer private (ec: ExecutionContext, sc: Schedu
             f.cancel(false)
             ()
           })
-        } else {
+        } else
           ref.complete(IO.unit)
-        }
       }
     })
 }
@@ -80,14 +79,16 @@ private[internals] object IOTimer {
       .flatMap(s => Try(s.toLong).toOption)
       .filter(_ > 0L)
 
-    val tp = new ScheduledThreadPoolExecutor(corePoolSize, new ThreadFactory {
-      def newThread(r: Runnable): Thread = {
-        val th = new Thread(r)
-        th.setName(s"cats-effect-scheduler-${th.getId}")
-        th.setDaemon(true)
-        th
-      }
-    })
+    val tp = new ScheduledThreadPoolExecutor(corePoolSize,
+                                             new ThreadFactory {
+                                               def newThread(r: Runnable): Thread = {
+                                                 val th = new Thread(r)
+                                                 th.setName(s"cats-effect-scheduler-${th.getId}")
+                                                 th.setDaemon(true)
+                                                 th
+                                               }
+                                             }
+    )
     keepAliveTime.foreach { timeout =>
       // Call in this order or it throws!
       tp.setKeepAliveTime(timeout, TimeUnit.MILLISECONDS)

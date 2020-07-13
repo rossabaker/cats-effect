@@ -42,8 +42,8 @@ private[effect] object IOParMap {
                                               fb: IO[B],
                                               f: (A, B) => C,
                                               conn: IOConnection,
-                                              cb: Callback.T[C])
-      extends Runnable {
+                                              cb: Callback.T[C]
+  ) extends Runnable {
 
     /**
      * State synchronized by an atomic reference. Possible values:

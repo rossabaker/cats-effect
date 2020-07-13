@@ -139,7 +139,7 @@ abstract class MVar2[F[_], A] extends MVar[F, A] {
 
   /**
    * Replaces a value in MVar and returns the old value.
-
+   *
    * @param newValue is a new value
    * @return the value taken
    */
